@@ -112,32 +112,13 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
 <div class="wrap">
 
   <div class="info-box info-teal">
-    💡 Esta ferramenta processa as planilhas <strong>no seu navegador</strong> e publica direto no repositório GitHub
-    (<code>operacionalDaniel/MetricasIluminaLigth</code>). Nenhum arquivo é enviado a terceiros.
+    💡 Esta ferramenta processa as planilhas <strong>no seu navegador</strong> e publica direto no banco de dados.
+    Os indicadores ficam disponíveis instantaneamente nos painéis.
   </div>
 
-  <!-- PASSO 1: TOKEN -->
+  <!-- PASSO 1: MÊS -->
   <div class="step">
-    <div class="step-title"><span class="step-num">1</span> Token de Acesso GitHub</div>
-    <div class="step-desc">Necessário para publicar. Gere em GitHub → Settings → Developer settings → Personal access tokens.</div>
-    <div class="field-row">
-      <label class="field-label">Personal Access Token (escopo "repo")</label>
-      <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
-      <div class="check-row">
-        <input type="checkbox" id="remember-token"/>
-        <label for="remember-token">Lembrar neste navegador (salvo localmente, nunca enviado a terceiros)</label>
-      </div>
-      <div class="help-text">
-        ⚠ Use um token com permissão restrita apenas a este repositório (fine-grained token, "Contents: Read and write").
-        Não compartilhe esta página publicamente enquanto o token estiver salvo.
-        <a href="https://github.com/settings/tokens" target="_blank">Gerenciar tokens →</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- PASSO 2: MÊS -->
-  <div class="step">
-    <div class="step-title"><span class="step-num">2</span> Mês de Referência</div>
+    <div class="step-title"><span class="step-num">1</span> Mês de Referência</div>
     <div class="step-desc">Selecione o mês correspondente às planilhas. O sistema detecta automaticamente, mas confirme antes de publicar.</div>
     <div class="field-grid">
       <div class="field-row">
@@ -152,9 +133,9 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
     <div id="mes-existente-aviso"></div>
   </div>
 
-  <!-- PASSO 3: ARQUIVOS -->
+  <!-- PASSO 2: ARQUIVOS -->
   <div class="step">
-    <div class="step-title"><span class="step-num">3</span> Planilhas do Mês</div>
+    <div class="step-title"><span class="step-num">2</span> Planilhas do Mês</div>
     <div class="step-desc">Exportações do sistema Exati. Envie ao menos um arquivo para habilitar a publicação — os campos não enviados mantêm os valores já publicados para o mês (ou ficam zerados, se o mês ainda não existir). Ocorrências + Prazos juntos dão o resultado mais completo.</div>
     <div class="upload-grid">
       <div class="upload-slot" id="slot-oc" onclick="document.getElementById('fi-oc').click()">
@@ -264,11 +245,6 @@ function montarSelectMeses(){
 // ══════════════════════════════════════════════
 window.addEventListener('load', function(){
   montarSelectMeses();
-  const saved = localStorage.getItem('iluminaboard_gh_token');
-  if(saved){
-    document.getElementById('gh-token').value = saved;
-    document.getElementById('remember-token').checked = true;
-  }
   ['fi-oc','fi-mat','fi-prazos','fi-anexo','fi-cadastro'].forEach(setupFileInput);
 });
 
@@ -661,26 +637,14 @@ async function processarPreview(){
       alert('Selecione ao menos um arquivo no Passo 3 antes de pré-visualizar.');
       return;
     }
-
-    const tokenChk = document.getElementById('gh-token').value.trim();
-    const sel = document.getElementById('mes-select');
+    const sel = document.getElementById("mes-select");
     let mesSelecionado = sel.value;
-    document.getElementById('mes-existente-aviso').innerHTML = '';
-
-    // Busca a base já publicada UMA única vez — serve tanto para preservar campos que
-    // esta rodada não está reenviando (materiais, contraprestação, cadastro, prazos)
-    // quanto para o aviso de sobrescrita.
+    document.getElementById("mes-existente-aviso").innerHTML = "";
     let existenteRemoto = null;
-    if(tokenChk){
-      try{
-        const opAtual = await ghGetFile(tokenChk, 'dados_operacional.json');
-        if(opAtual.data.meses && opAtual.data.meses[mesSelecionado]){
-          existenteRemoto = opAtual.data.meses[mesSelecionado];
-        }
-      }catch(e){ log('Não foi possível checar dados existentes: '+e.message, 'warn'); }
-    } else {
-      log('Sem token informado — não é possível checar/preservar dados já publicados.', 'warn');
-    }
+    try{
+      const { data: existente } = await db.from("dados_mensais").select("dados").eq("tenant_id", TENANT_ID).eq("mes", mesSelecionado).maybeSingle();
+      if(existente) existenteRemoto = existente.dados;
+    }catch(e){ log("Erro ao checar dados existentes: "+e.message, "warn"); }
 
     let d;
     if(FILES.oc){
@@ -694,12 +658,10 @@ async function processarPreview(){
         mesSelecionado = dOc.mesDetectado;
         log('Mês detectado: '+dOc.mesDetectado.toUpperCase()+' (selecionado automaticamente).', 'ok');
         // O mês mudou após a auto-seleção — refaz a checagem de base com o mês certo.
-        if(tokenChk){
-          try{
-            const opAtual2 = await ghGetFile(tokenChk, 'dados_operacional.json');
-            existenteRemoto = (opAtual2.data.meses && opAtual2.data.meses[mesSelecionado]) || null;
-          }catch(e){ /* mantém o que já tinha */ }
-        }
+        try{
+          const { data: existente2 } = await db.from('dados_mensais').select('dados').eq('tenant_id', TENANT_ID).eq('mes', mesSelecionado).maybeSingle();
+          existenteRemoto = existente2 ? existente2.dados : null;
+        }catch(e){ /* mantem o que ja tinha */ }
       } else if(dOc.mesDetectado && dOc.mesDetectado!==mesSelecionado){
         document.getElementById('mes-existente-aviso').innerHTML =
           '<div class="info-box info-amber">⚠ A planilha indica <strong>'+dOc.mesDetectado.toUpperCase()+
