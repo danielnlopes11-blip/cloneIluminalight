@@ -150,7 +150,7 @@ const SUPABASE_URL = 'https://rxaxmurvqnccecxpjkhi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-const TENANT_ID = '652de80d-3d09-4db8-b32b-229394abc976';
+
 
 const TAB_OPTIONS = [
   {id:'visao', icon:'📊', label:'Visão Geral'},
@@ -197,7 +197,7 @@ async function carregarMesesDisponiveis(){
     const { data, error } = await db
       .from('dados_mensais')
       .select('mes, dados')
-      .eq('tenant_id', TENANT_ID)
+      .eq('tenant_id', await window.getTenantId())
       .not('mes', 'like', '%_sla');
 
     if(!error && data){
@@ -284,7 +284,7 @@ async function gerarApresentacao(){
     const { data, error } = await db
       .from('apresentacoes_publicas')
       .insert({
-        tenant_id: TENANT_ID,
+        tenant_id: await window.getTenantId(),
         titulo: config.titulo,
         subtitulo: config.subtitulo,
         meses_incluidos: mesesSelecionados,

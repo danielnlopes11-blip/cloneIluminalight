@@ -212,7 +212,7 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
 <script>
 const { createClient } = supabase
 const db = createClient('https://rxaxmurvqnccecxpjkhi.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko')
-const TENANT_ID = '652de80d-3d09-4db8-b32b-229394abc976'
+
 const REPO_OWNER = 'operacionalDaniel';
 const REPO_NAME  = 'MetricasIluminaLigth';
 const BRANCH = 'main';
@@ -642,7 +642,7 @@ async function processarPreview(){
     document.getElementById("mes-existente-aviso").innerHTML = "";
     let existenteRemoto = null;
     try{
-      const { data: existente } = await db.from("dados_mensais").select("dados").eq("tenant_id", TENANT_ID).eq("mes", mesSelecionado).maybeSingle();
+      const { data: existente } = await db.from("dados_mensais").select("dados").eq("tenant_id", await window.getTenantId()).eq("mes", mesSelecionado).maybeSingle();
       if(existente) existenteRemoto = existente.dados;
     }catch(e){ log("Erro ao checar dados existentes: "+e.message, "warn"); }
 
@@ -659,7 +659,7 @@ async function processarPreview(){
         log('Mês detectado: '+dOc.mesDetectado.toUpperCase()+' (selecionado automaticamente).', 'ok');
         // O mês mudou após a auto-seleção — refaz a checagem de base com o mês certo.
         try{
-          const { data: existente2 } = await db.from('dados_mensais').select('dados').eq('tenant_id', TENANT_ID).eq('mes', mesSelecionado).maybeSingle();
+          const { data: existente2 } = await db.from('dados_mensais').select('dados').eq('tenant_id', await window.getTenantId()).eq('mes', mesSelecionado).maybeSingle();
           existenteRemoto = existente2 ? existente2.dados : null;
         }catch(e){ /* mantem o que ja tinha */ }
       } else if(dOc.mesDetectado && dOc.mesDetectado!==mesSelecionado){
@@ -861,7 +861,7 @@ async function publicarGitHub(){
     const novoMes = Object.assign({}, d, { mes });
     delete novoMes.mesDetectado;
     const { error: errOp } = await db.from('dados_mensais').upsert({
-      tenant_id: TENANT_ID, mes: mes,
+      tenant_id: await window.getTenantId(), mes: mes,
       dados: { tipo: 'operacional', ...novoMes },
       atualizado_em: new Date().toISOString()
     }, { onConflict: 'tenant_id,mes' });
@@ -870,7 +870,7 @@ async function publicarGitHub(){
     if(anexo){
       log('Salvando SLAs no Supabase…');
       const { error: errSla } = await db.from('dados_mensais').upsert({
-        tenant_id: TENANT_ID, mes: mes + '_sla',
+        tenant_id: await window.getTenantId(), mes: mes + '_sla',
         dados: { tipo: 'sla', mes: mes, ...anexo.dadosSla },
         atualizado_em: new Date().toISOString()
       }, { onConflict: 'tenant_id,mes' });

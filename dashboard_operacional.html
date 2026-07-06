@@ -2392,7 +2392,7 @@ const _sbc = (typeof supabase !== 'undefined') ? supabase.createClient(
   'https://rxaxmurvqnccecxpjkhi.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko'
 ) : null;
-const _TENANT_ID = '652de80d-3d09-4db8-b32b-229394abc976';
+
 
 async function loadJson(){
   try{
@@ -2401,7 +2401,7 @@ async function loadJson(){
       const { data, error } = await _sbc
         .from('dados_mensais')
         .select('mes, dados, atualizado_em')
-        .eq('tenant_id', _TENANT_ID)
+        .eq('tenant_id', await window.getTenantId())
         .not('mes', 'like', '%_sla');
 
       if(!error && data && data.length){
