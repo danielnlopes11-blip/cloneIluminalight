@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Gerar Apresentação · IluminaBoard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#e8edf3;--card:#ffffff;
+  --border:#d1dae6;--border2:#b8c5d3;
+  --teal:#008fa8;--amber:#c47900;--red:#d42b2b;--green:#1a8a3c;--blue:#1a52b0;--purple:#7b35b8;
+  --text:#1a2535;--muted:#5a6e82;
+  --shadow:0 1px 4px rgba(0,0,0,.10),0 2px 12px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+.header{background:linear-gradient(135deg,#1a2a40 0%,#1e3554 100%);
+  border-bottom:2px solid #b8c5d3;padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.h-brand{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:.03em}
+.h-brand em{font-style:normal;color:#00d4c8}
+.h-sub{color:#a0b4c8;font-size:.72rem;margin-top:2px}
+.hbtn{padding:7px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;
+  color:rgba(255,255,255,.85);font-size:.74rem;cursor:pointer;text-decoration:none;display:inline-block}
+.hbtn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6)}
+
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px}
+
+.step{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  background:var(--purple);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.85rem;margin-right:10px}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;display:flex;align-items:center;margin-bottom:6px}
+.step-desc{font-size:.78rem;color:var(--muted);margin-bottom:16px;margin-left:36px}
+
+label.field-label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+input[type=password],input[type=text]{
+  width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;font-size:.88rem;
+  font-family:'Barlow',sans-serif;background:#fff;color:var(--text)}
+input:focus{outline:none;border-color:var(--purple)}
+.field-row{margin-bottom:14px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.field-grid{grid-template-columns:1fr}}
+.check-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);margin-top:8px}
+.help-text{font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.help-text a{color:var(--purple)}
+
+.chip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:700px){.chip-grid{grid-template-columns:repeat(2,1fr)}}
+.chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border2);
+  border-radius:8px;cursor:pointer;font-size:.82rem;transition:all .2s;background:#fff}
+.chip:hover{border-color:var(--purple);background:#faf5fd}
+.chip.checked{border-color:var(--purple);background:rgba(123,53,184,.06);color:var(--purple);font-weight:700}
+.chip input{margin:0}
+
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+@media(max-width:700px){.month-grid{grid-template-columns:repeat(3,1fr)}}
+.month-chip{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;
+  border:1.5px solid var(--border2);border-radius:8px;cursor:pointer;font-size:.78rem;background:#fff;transition:all .2s}
+.month-chip.checked{border-color:var(--teal);background:rgba(0,143,168,.06);color:var(--teal);font-weight:700}
+.month-chip.empty{opacity:.35;cursor:not-allowed;pointer-events:none}
+.month-chip small{font-size:.62rem;color:var(--muted);font-weight:400}
+.month-chip.checked small{color:var(--teal)}
+
+.btn-primary{padding:12px 28px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--purple),#5b21b6);color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:.95rem;font-weight:800;letter-spacing:.04em;transition:all .2s;box-shadow:var(--shadow)}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.info-box{padding:12px 16px;border-radius:8px;font-size:.78rem;margin-bottom:14px;line-height:1.6}
+.info-teal{background:#f0f9fb;border:1px solid rgba(0,143,168,.2);color:#0d4a56}
+.info-purple{background:#faf5fd;border:1px solid rgba(123,53,184,.2);color:#4a1d72}
+.info-amber{background:#fdf8f0;border:1px solid rgba(196,121,0,.25);color:#6b4500}
+.info-green{background:rgba(26,138,60,.05);border:1px solid rgba(26,138,60,.2);color:#0f5c26}
+.info-red{background:rgba(212,43,43,.05);border:1px solid rgba(212,43,43,.2);color:#8a1f1f}
+
+.log-area{background:#1a2535;border-radius:10px;padding:16px 18px;margin-top:16px;font-family:monospace;
+  font-size:.78rem;color:#a0d8c8;max-height:280px;overflow-y:auto;display:none;line-height:1.7}
+.log-line{margin-bottom:3px}
+.log-ok{color:#4ade80}
+.log-err{color:#f87171}
+.log-warn{color:#fbbf24}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.result-card{display:none;background:#fff;border:2px solid var(--green);border-radius:12px;padding:24px;margin-top:18px;text-align:center}
+.result-url{font-family:monospace;font-size:.92rem;background:var(--surface);padding:10px 16px;border-radius:8px;margin:14px 0;word-break:break-all}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="h-brand">GERAR <em>APRESENTAÇÃO</em></div>
+    <div class="h-sub">Monte uma visualização pública, somente leitura, e publique em repositório separado</div>
+  </div>
+  <a class="hbtn" href="index_menu.html">🏠 Menu</a>
+</div>
+
+<div class="wrap">
+
+  <div class="info-box info-purple">
+    🔒 A apresentação gerada é <strong>100% somente-leitura</strong> — não inclui upload, parser de planilhas
+    ou token de acesso. Quem receber o link não pode alterar nenhum dado, apenas visualizar as abas que você escolher.
+  </div>
+
+  <!-- PASSO 1: TOKEN -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">1</span> Token de Acesso GitHub</div>
+    <div class="step-desc">Necessário só para você publicar (quem visualiza não precisa de token nenhum).</div>
+    <div class="field-row">
+      <label class="field-label">Personal Access Token (escopo "repo")</label>
+      <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+      <div class="check-row">
+        <input type="checkbox" id="remember-token"/>
+        <label for="remember-token">Lembrar neste navegador</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 2: REPOSITÓRIO DE DESTINO -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">2</span> Repositório Público de Destino</div>
+    <div class="step-desc">Onde a apresentação será publicada. Se não existir, será criado automaticamente (público, com GitHub Pages habilitado).</div>
+    <div class="field-row">
+      <label class="field-label">Nome do repositório</label>
+      <input type="text" id="repo-nome" value="IluminaBoard-Apresentacao" placeholder="ex: IluminaBoard-Apresentacao"/>
+      <div class="help-text">Será acessível em: <code id="preview-url">https://operacionalDaniel.github.io/IluminaBoard-Apresentacao/</code></div>
+    </div>
+  </div>
+
+  <!-- PASSO 3: TÍTULO -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">3</span> Título da Apresentação</div>
+    <div class="step-desc">Opcional — personalize para o público que vai receber (ex: Prefeitura, Auditoria, Reunião de Diretoria).</div>
+    <div class="field-grid">
+      <div class="field-row">
+        <label class="field-label">Título</label>
+        <input type="text" id="titulo-input" placeholder="Deixe vazio para usar o padrão"/>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Subtítulo</label>
+        <input type="text" id="subtitulo-input" placeholder="Deixe vazio para usar o padrão"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 4: MESES -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">4</span> Meses a Incluir</div>
+    <div class="step-desc">Selecione quais meses farão parte desta apresentação.</div>
+    <div id="meses-loading" class="info-box info-teal">Carregando meses disponíveis…</div>
+    <div class="month-grid" id="month-grid" style="display:none"></div>
+  </div>
+
+  <!-- PASSO 5: ABAS -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">5</span> Abas / Indicadores a Mostrar</div>
+    <div class="step-desc">Escolha exatamente o que o público vai ver. Nada além disso aparecerá na apresentação.</div>
+    <div class="chip-grid" id="tabs-grid"></div>
+  </div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:20px 0">
+    <button class="btn-primary" id="btn-gerar" onclick="gerarEPublicar()">🚀 Gerar e Publicar Apresentação</button>
+  </div>
+
+  <div class="log-area" id="log-area"></div>
+
+  <div class="result-card" id="result-card">
+    <div style="font-size:2.2rem;margin-bottom:10px">🎉</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800">Apresentação publicada com sucesso!</div>
+    <div class="result-url" id="result-url"></div>
+    <a id="result-link" href="#" target="_blank" class="btn-primary" style="text-decoration:none;display:inline-block;margin-top:6px">🔗 Abrir Apresentação</a>
+    <div style="font-size:.74rem;color:var(--muted);margin-top:12px">O GitHub Pages pode levar 1-2 minutos para ficar disponível na primeira publicação.</div>
+  </div>
+
+</div>
+
+<script>
+const SRC_OWNER = 'operacionalDaniel';
+const SRC_REPO  = 'MetricasIluminaLigth';
+const SRC_BRANCH = 'main';
+
+const TAB_OPTIONS = [
+  {id:'visao', icon:'📊', label:'Visão Geral'},
+  {id:'trabalho', icon:'⚙️', label:'Índices de Trabalho'},
+  {id:'ronda', icon:'🚐', label:'Ronda Própria'},
+  {id:'telegestao', icon:'📡', label:'Tele Gestão'},
+  {id:'origens', icon:'🔍', label:'Outras Origens'},
+  {id:'materiais', icon:'🔧', label:'Materiais'},
+  {id:'prazos', icon:'⏱', label:'Prazos'},
+  {id:'comparativo', icon:'📈', label:'Comparativo'},
+  {id:'mapa', icon:'🗺️', label:'Mapa'},
+  {id:'contraprestacao', icon:'💰', label:'Contraprestação'},
+  {id:'panorama', icon:'📅', label:'Panorama Anual'}
+];
+const ALL_MESES = ['jan/26','fev/26','mar/26','abr/26','mai/26','jun/26','jul/26','ago/26','set/26','out/26','nov/26','dez/26'];
+const MES_NOMES = {jan:'Janeiro',fev:'Fevereiro',mar:'Março',abr:'Abril',mai:'Maio',jun:'Junho',jul:'Julho',ago:'Agosto',set:'Setembro',out:'Outubro',nov:'Novembro',dez:'Dezembro'};
+
+let DADOS_DISPONIVEIS = {};
+
+window.addEventListener('load', function(){
+  const saved = localStorage.getItem('iluminaboard_gh_token');
+  if(saved){ document.getElementById('gh-token').value = saved; document.getElementById('remember-token').checked = true; }
+
+  buildTabsGrid();
+  carregarMesesDisponiveis();
+
+  document.getElementById('repo-nome').addEventListener('input', updatePreviewUrl);
+  updatePreviewUrl();
+});
+
+function updatePreviewUrl(){
+  const nome = document.getElementById('repo-nome').value.trim() || 'IluminaBoard-Apresentacao';
+  document.getElementById('preview-url').textContent = `https://${SRC_OWNER.toLowerCase()}.github.io/${nome}/`;
+}
+
+function buildTabsGrid(){
+  const grid = document.getElementById('tabs-grid');
+  grid.innerHTML = TAB_OPTIONS.map(t => `
+    <label class="chip" id="chip-${t.id}">
+      <input type="checkbox" value="${t.id}" onchange="toggleChip('${t.id}')" ${t.id==='visao'||t.id==='comparativo'?'checked':''}/>
+      ${t.icon} ${t.label}
+    </label>
+  `).join('');
+  ['visao','comparativo'].forEach(id => document.getElementById('chip-'+id).classList.add('checked'));
+}
+function toggleChip(id){
+  const chip = document.getElementById('chip-'+id);
+  const checked = chip.querySelector('input').checked;
+  chip.classList.toggle('checked', checked);
+}
+
+async function carregarMesesDisponiveis(){
+  try{
+    const res = await fetch(`https://raw.githubusercontent.com/${SRC_OWNER}/${SRC_REPO}/${SRC_BRANCH}/dados_operacional.json?v=`+Date.now());
+    const json = await res.json();
+    DADOS_DISPONIVEIS = json.meses || {};
+  }catch(e){
+    DADOS_DISPONIVEIS = {};
+  }
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = ALL_MESES.map(m=>{
+    const ab = m.split('/')[0];
+    const d = DADOS_DISPONIVEIS[m];
+    const has = !!d;
+    return `<label class="month-chip ${has?'':'empty'}" id="mchip-${ab}">
+      <input type="checkbox" value="${m}" ${has?'':'disabled'} onchange="toggleMonthChip('${ab}')" ${has?'checked':''} style="display:none"/>
+      <strong>${MES_NOMES[ab]}</strong>
+      <small>${has ? d.total_os+' OS' : 'sem dados'}</small>
+    </label>`;
+  }).join('');
+  ALL_MESES.forEach(m=>{
+    const ab = m.split('/')[0];
+    if(DADOS_DISPONIVEIS[m]){
+      document.getElementById('mchip-'+ab).classList.add('checked');
+    }
+  });
+  document.getElementById('meses-loading').style.display='none';
+  grid.style.display='grid';
+}
+function toggleMonthChip(ab){
+  const el = document.getElementById('mchip-'+ab);
+  const checked = el.querySelector('input').checked;
+  el.classList.toggle('checked', checked);
+}
+
+function log(msg, type){
+  const area = document.getElementById('log-area');
+  area.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'log-line'+(type==='ok'?' log-ok':type==='err'?' log-err':type==='warn'?' log-warn':'');
+  line.textContent = (type==='ok'?'✓ ':type==='err'?'✗ ':'• ') + msg;
+  area.appendChild(line);
+  area.scrollTop = area.scrollHeight;
+}
+
+function nowStr(){
+  const d = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+
+// ══════════════════════════════════════════════
+//  GITHUB API HELPERS
+// ══════════════════════════════════════════════
+async function ghRequest(token, method, path, body){
+  const opts = { method, headers: { 'Authorization': 'token '+token, 'Content-Type': 'application/json' } };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch('https://api.github.com'+path, opts);
+  return res;
+}
+
+async function repoExists(token, owner, repo){
+  const res = await ghRequest(token, 'GET', `/repos/${owner}/${repo}`);
+  return res.ok;
+}
+
+async function criarRepo(token, repo){
+  const res = await ghRequest(token, 'POST', '/user/repos', {
+    name: repo, description: 'Apresentação pública (somente leitura) gerada pelo IluminaBoard', private: false,
+    auto_init: true, has_issues:false, has_projects:false, has_wiki:false
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error('Falha ao criar repositório: '+(err.message||res.status));
+  }
+  return await res.json();
+}
+
+async function habilitarPages(token, owner, repo){
+  const res = await ghRequest(token, 'POST', `/repos/${owner}/${repo}/pages`, {
+    source: { branch: 'main', path: '/' }
+  });
+  // 201 criado, 409 já existe (ambos OK para nós)
+  if(!res.ok && res.status!==409){
+    const err = await res.json().catch(()=>({}));
+    throw new Error('Falha ao habilitar GitHub Pages: '+(err.message||res.status));
+  }
+}
+
+async function publicarArquivo(token, owner, repo, path, contentStr, message){
+  // Tenta achar sha existente (arquivo pode já existir)
+  let sha;
+  try{
+    const r = await ghRequest(token, 'GET', `/repos/${owner}/${repo}/contents/${path}`);
+    if(r.ok){ const j = await r.json(); sha = j.sha; }
+  }catch(e){}
+
+  const b64 = btoa(unescape(encodeURIComponent(contentStr)));
+  const body = { message, content: b64, branch: 'main' };
+  if(sha) body.sha = sha;
+
+  const res = await ghRequest(token, 'PUT', `/repos/${owner}/${repo}/contents/${path}`, body);
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error('Falha ao publicar '+path+': '+(err.message||res.status));
+  }
+  return await res.json();
+}
+
+// ══════════════════════════════════════════════
+//  GERAR E PUBLICAR
+// ══════════════════════════════════════════════
+async function gerarEPublicar(){
+  const token = document.getElementById('gh-token').value.trim();
+  if(!token){ alert('Informe o token do GitHub no Passo 1.'); return; }
+  const repoNome = document.getElementById('repo-nome').value.trim();
+  if(!repoNome){ alert('Informe o nome do repositório no Passo 2.'); return; }
+
+  const mesesSelecionados = Array.from(document.querySelectorAll('#month-grid input:checked')).map(i=>i.value);
+  if(!mesesSelecionados.length){ alert('Selecione ao menos um mês no Passo 4.'); return; }
+
+  const tabsSelecionadas = Array.from(document.querySelectorAll('#tabs-grid input:checked')).map(i=>i.value);
+  if(!tabsSelecionadas.length){ alert('Selecione ao menos uma aba no Passo 5.'); return; }
+
+  if(document.getElementById('remember-token').checked){
+    localStorage.setItem('iluminaboard_gh_token', token);
+  } else {
+    localStorage.removeItem('iluminaboard_gh_token');
+  }
+
+  const btn = document.getElementById('btn-gerar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Gerando…';
+  document.getElementById('result-card').style.display = 'none';
+
+  try{
+    log('Buscando dados de origem (dados_operacional.json)…');
+    const dadosRes = await fetch(`https://raw.githubusercontent.com/${SRC_OWNER}/${SRC_REPO}/${SRC_BRANCH}/dados_operacional.json?v=`+Date.now());
+    const dadosJson = await dadosRes.json();
+
+    const mesesEmbutidos = {};
+    mesesSelecionados.forEach(m=>{ if(dadosJson.meses[m]) mesesEmbutidos[m] = dadosJson.meses[m]; });
+    log(mesesSelecionados.length+' mês(es) selecionado(s): '+mesesSelecionados.join(', '), 'ok');
+
+    log('Buscando template de apresentação (template_apresentacao.html)…');
+    const tplRes = await fetch(`https://raw.githubusercontent.com/${SRC_OWNER}/${SRC_REPO}/${SRC_BRANCH}/template_apresentacao.html?v=`+Date.now());
+    const tplHtml = await tplRes.text();
+
+    const config = {
+      titulo: document.getElementById('titulo-input').value.trim() || null,
+      subtitulo: document.getElementById('subtitulo-input').value.trim() || null,
+      geradoEm: nowStr(),
+      tabs: tabsSelecionadas,
+      meses: mesesEmbutidos
+    };
+
+    log('Montando apresentação com '+tabsSelecionadas.length+' aba(s) selecionada(s)…');
+    const configRegex = /const EXPORT_CONFIG = \/\*__CONFIG_START__\*\/\{[\s\S]*?\}\/\*__CONFIG_END__\*\/;/;
+    if(!configRegex.test(tplHtml)) throw new Error('Template inválido — placeholder de configuração não encontrado.');
+    const novoConfigStr = 'const EXPORT_CONFIG = ' + JSON.stringify(config) + ';';
+    const finalHtml = tplHtml.replace(configRegex, novoConfigStr);
+    log('Apresentação montada ('+Math.round(finalHtml.length/1024)+' KB).', 'ok');
+
+    log('Verificando se o repositório "'+repoNome+'" existe…');
+    const existe = await repoExists(token, SRC_OWNER, repoNome);
+    if(!existe){
+      log('Repositório não existe — criando…', 'warn');
+      await criarRepo(token, repoNome);
+      log('Repositório criado.', 'ok');
+      await new Promise(r=>setTimeout(r,1500)); // dá tempo do repo inicializar
+    } else {
+      log('Repositório já existe — será atualizado.', 'ok');
+    }
+
+    log('Publicando index.html…');
+    await publicarArquivo(token, SRC_OWNER, repoNome, 'index.html', finalHtml,
+      'Apresentação gerada via gerar_apresentacao.html — '+mesesSelecionados.length+' mês(es), '+tabsSelecionadas.length+' aba(s)');
+    log('index.html publicado.', 'ok');
+
+    log('Habilitando GitHub Pages…');
+    await habilitarPages(token, SRC_OWNER, repoNome);
+    log('GitHub Pages habilitado.', 'ok');
+
+    const url = `https://${SRC_OWNER.toLowerCase()}.github.io/${repoNome}/`;
+    log('🎉 Publicação concluída!', 'ok');
+
+    document.getElementById('result-url').textContent = url;
+    document.getElementById('result-link').href = url;
+    document.getElementById('result-card').style.display = 'block';
+
+  }catch(e){
+    log(e.message, 'err');
+    alert('Erro: '+e.message);
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '🚀 Gerar e Publicar Apresentação';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Publicar Dados · IluminaBoard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#e8edf3;--card:#ffffff;
+  --border:#d1dae6;--border2:#b8c5d3;
+  --teal:#008fa8;--amber:#c47900;--red:#d42b2b;--green:#1a8a3c;--blue:#1a52b0;--purple:#7b35b8;
+  --text:#1a2535;--muted:#5a6e82;
+  --shadow:0 1px 4px rgba(0,0,0,.10),0 2px 12px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+.header{background:linear-gradient(135deg,#1a2a40 0%,#1e3554 100%);
+  border-bottom:2px solid #b8c5d3;padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.h-brand{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:.03em}
+.h-brand em{font-style:normal;color:#00d4c8}
+.h-sub{color:#a0b4c8;font-size:.72rem;margin-top:2px}
+.hbtn{padding:7px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;
+  color:rgba(255,255,255,.85);font-size:.74rem;cursor:pointer;text-decoration:none;display:inline-block}
+.hbtn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6)}
+
+.wrap{max-width:920px;margin:0 auto;padding:28px 20px}
+
+.step{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  background:var(--teal);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.85rem;margin-right:10px}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;display:flex;align-items:center;margin-bottom:6px}
+.step-desc{font-size:.78rem;color:var(--muted);margin-bottom:16px;margin-left:36px}
+
+label.field-label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+input[type=password],input[type=text],input[type=number],select{
+  width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;font-size:.88rem;
+  font-family:'Barlow',sans-serif;background:#fff;color:var(--text)}
+input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--teal)}
+.field-row{margin-bottom:14px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.field-grid{grid-template-columns:1fr}}
+.check-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);margin-top:8px}
+.help-text{font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.help-text a{color:var(--teal)}
+
+.upload-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:1100px){.upload-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.upload-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.upload-grid{grid-template-columns:1fr}}
+.upload-slot{background:var(--surface);border:2px dashed var(--border2);border-radius:12px;padding:22px 16px;
+  text-align:center;cursor:pointer;transition:all .25s;position:relative}
+.upload-slot:hover{border-color:var(--teal);background:#f0f9fb}
+.upload-slot.done{border-color:var(--green);border-style:solid;background:rgba(26,138,60,.05)}
+.slot-icon{font-size:1.7rem;display:block;margin-bottom:8px}
+.slot-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.92rem;margin-bottom:4px}
+.slot-badge{font-size:.62rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  background:rgba(0,143,168,.08);border:1px solid rgba(0,143,168,.2);color:var(--teal);display:inline-block;margin-bottom:8px}
+.slot-badge.opt{background:rgba(196,121,0,.08);border-color:rgba(196,121,0,.2);color:var(--amber)}
+.slot-status{font-size:.7rem;font-weight:600;color:var(--muted);margin-top:6px}
+.slot-status.ok{color:var(--green)}
+
+.btn-primary{padding:12px 28px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal),#0077a0);color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:.95rem;font-weight:800;letter-spacing:.04em;transition:all .2s;box-shadow:var(--shadow)}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-publish{background:linear-gradient(135deg,var(--green),#15803d)}
+.btn-secondary{padding:10px 20px;border-radius:8px;border:1px solid var(--border2);background:#fff;
+  color:var(--muted);font-size:.82rem;cursor:pointer}
+.btn-secondary:hover{border-color:var(--teal);color:var(--teal)}
+
+.preview-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px;box-shadow:var(--shadow);display:none}
+.preview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+@media(max-width:700px){.preview-grid{grid-template-columns:repeat(2,1fr)}}
+.pv-card{background:var(--surface);border-radius:8px;padding:14px;text-align:center}
+.pv-label{font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.pv-val{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:var(--teal)}
+
+.info-box{padding:12px 16px;border-radius:8px;font-size:.78rem;margin-bottom:14px;line-height:1.6}
+.info-teal{background:#f0f9fb;border:1px solid rgba(0,143,168,.2);color:#0d4a56}
+.info-amber{background:#fdf8f0;border:1px solid rgba(196,121,0,.25);color:#6b4500}
+.info-red{background:rgba(212,43,43,.05);border:1px solid rgba(212,43,43,.2);color:#8a1f1f}
+.info-green{background:rgba(26,138,60,.05);border:1px solid rgba(26,138,60,.2);color:#0f5c26}
+
+.log-area{background:#1a2535;border-radius:10px;padding:16px 18px;margin-top:16px;font-family:monospace;
+  font-size:.78rem;color:#a0d8c8;max-height:260px;overflow-y:auto;display:none;line-height:1.7}
+.log-line{margin-bottom:3px}
+.log-ok{color:#4ade80}
+.log-err{color:#f87171}
+.log-warn{color:#fbbf24}
+
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="h-brand">PUBLICAR <em>DADOS</em></div>
+    <div class="h-sub">Envie os dados mensais direto para o GitHub · sem precisar do chat</div>
+  </div>
+  <a class="hbtn" href="index_menu.html">🏠 Menu</a>
+</div>
+
+<div class="wrap">
+
+  <div class="info-box info-teal">
+    💡 Esta ferramenta processa as planilhas <strong>no seu navegador</strong> e publica direto no repositório GitHub
+    (<code>operacionalDaniel/MetricasIluminaLigth</code>). Nenhum arquivo é enviado a terceiros.
+  </div>
+
+  <!-- PASSO 1: TOKEN -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">1</span> Token de Acesso GitHub</div>
+    <div class="step-desc">Necessário para publicar. Gere em GitHub → Settings → Developer settings → Personal access tokens.</div>
+    <div class="field-row">
+      <label class="field-label">Personal Access Token (escopo "repo")</label>
+      <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+      <div class="check-row">
+        <input type="checkbox" id="remember-token"/>
+        <label for="remember-token">Lembrar neste navegador (salvo localmente, nunca enviado a terceiros)</label>
+      </div>
+      <div class="help-text">
+        ⚠ Use um token com permissão restrita apenas a este repositório (fine-grained token, "Contents: Read and write").
+        Não compartilhe esta página publicamente enquanto o token estiver salvo.
+        <a href="https://github.com/settings/tokens" target="_blank">Gerenciar tokens →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 2: MÊS -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">2</span> Mês de Referência</div>
+    <div class="step-desc">Selecione o mês correspondente às planilhas. O sistema detecta automaticamente, mas confirme antes de publicar.</div>
+    <div class="field-grid">
+      <div class="field-row">
+        <label class="field-label">Mês / Ano</label>
+        <select id="mes-select"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Mês detectado na planilha</label>
+        <input type="text" id="mes-detectado" disabled placeholder="Aparece após processar"/>
+      </div>
+    </div>
+    <div id="mes-existente-aviso"></div>
+  </div>
+
+  <!-- PASSO 3: ARQUIVOS -->
+  <div class="step">
+    <div class="step-title"><span class="step-num">3</span> Planilhas do Mês</div>
+    <div class="step-desc">Exportações do sistema Exati. Envie ao menos um arquivo para habilitar a publicação — os campos não enviados mantêm os valores já publicados para o mês (ou ficam zerados, se o mês ainda não existir). Ocorrências + Prazos juntos dão o resultado mais completo.</div>
+    <div class="upload-grid">
+      <div class="upload-slot" id="slot-oc" onclick="document.getElementById('fi-oc').click()">
+        <span class="slot-icon">📋</span>
+        <div class="slot-title">Ocorrências</div>
+        <span class="slot-badge">RECOMENDADO</span>
+        <div class="slot-status" id="status-oc">Clique para selecionar</div>
+      </div>
+      <div class="upload-slot" id="slot-mat" onclick="document.getElementById('fi-mat').click()">
+        <span class="slot-icon">🔧</span>
+        <div class="slot-title">Materiais Aplicados</div>
+        <span class="slot-badge opt">OPCIONAL</span>
+        <div class="slot-status" id="status-mat">Clique para selecionar</div>
+      </div>
+      <div class="upload-slot" id="slot-prazos" onclick="document.getElementById('fi-prazos').click()">
+        <span class="slot-icon">⏱️</span>
+        <div class="slot-title">Prazos de Atendimento</div>
+        <span class="slot-badge opt">RECOMENDADO</span>
+        <div class="slot-status" id="status-prazos">ConsultarPrazosAtendimento-*.xlsx</div>
+      </div>
+      <div class="upload-slot" id="slot-anexo" onclick="document.getElementById('fi-anexo').click()">
+        <span class="slot-icon">💰</span>
+        <div class="slot-title">ANEXO_1 Contraprestação</div>
+        <span class="slot-badge opt">OPCIONAL</span>
+        <div class="slot-status" id="status-anexo">Clique para selecionar</div>
+      </div>
+      <div class="upload-slot" id="slot-cadastro" onclick="document.getElementById('fi-cadastro').click()">
+        <span class="slot-icon">🗂️</span>
+        <div class="slot-title">Validação de Cadastro</div>
+        <span class="slot-badge opt">OPCIONAL</span>
+        <div class="slot-status" id="status-cadastro">Relatorio_amostras_atributos_laudo_*.xlsx</div>
+      </div>
+    </div>
+    <input type="file" id="fi-oc" accept=".xlsx,.xls" style="display:none"/>
+    <input type="file" id="fi-mat" accept=".xlsx,.xls" style="display:none"/>
+    <input type="file" id="fi-prazos" accept=".xlsx,.xls" style="display:none"/>
+    <input type="file" id="fi-anexo" accept=".xlsx,.xls" style="display:none"/>
+    <input type="file" id="fi-cadastro" accept=".xlsx,.xls" style="display:none"/>
+
+    <div id="anexo-extra" style="display:none;margin-top:14px">
+      <div class="field-grid">
+        <div class="field-row">
+          <label class="field-label">Total de Ligações (Pesquisa Satisfação)</label>
+          <input type="number" id="lig-input" value="0" min="0"/>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Não Opinou</label>
+          <input type="number" id="nop-input" value="0" min="0"/>
+        </div>
+      </div>
+      <div class="help-text">Esses dois campos não têm posição fixa no ANEXO_1 — preencha manualmente conforme o relatório do Call Center (opcional, usado apenas no Dashboard SLA).</div>
+    </div>
+  </div>
+
+  <!-- AÇÕES -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:20px 0">
+    <button class="btn-primary" id="btn-preview" onclick="processarPreview()" disabled>🔍 Pré-visualizar Dados</button>
+    <button class="btn-primary btn-publish" id="btn-publish" onclick="publicarGitHub()" disabled>☁️ Publicar no GitHub</button>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-card" id="preview-card">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05rem;margin-bottom:4px" id="preview-title">Pré-visualização</div>
+    <div style="font-size:.76rem;color:var(--muted)" id="preview-sub"></div>
+    <div class="preview-grid" id="preview-grid"></div>
+    <div id="preview-extra" style="margin-top:14px"></div>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-area" id="log-area"></div>
+
+</div>
+
+<script>
+const REPO_OWNER = 'operacionalDaniel';
+const REPO_NAME  = 'MetricasIluminaLigth';
+const BRANCH = 'main';
+const DIAS_MES = {jan:31,fev:28,mar:31,abr:30,mai:31,jun:30,jul:31,ago:31,set:30,out:31,nov:30,dez:31};
+
+const FILES = {oc:null, mat:null, prazos:null, anexo:null, cadastro:null};
+let PREVIEW_DATA = null; // { mes, dadosOperacional, dadosSlaSimples }
+
+const MESES_ABREV = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESES_NOME  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// Gera as opções de mês dinamicamente: dos últimos 12 meses até o mês seguinte,
+// com o mês anterior ao atual pré-selecionado (é o mês que normalmente se publica).
+function montarSelectMeses(){
+  const sel = document.getElementById('mes-select');
+  const hoje = new Date();
+  const opts = [];
+  for(let i=12;i>=-1;i--){
+    const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    opts.push({v: MESES_ABREV[d.getMonth()]+'/'+String(d.getFullYear()).slice(2),
+               t: MESES_NOME[d.getMonth()]+' / '+d.getFullYear()});
+  }
+  const anterior = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1);
+  const defVal = MESES_ABREV[anterior.getMonth()]+'/'+String(anterior.getFullYear()).slice(2);
+  sel.innerHTML = opts.map(o=>`<option value="${o.v}"${o.v===defVal?' selected':''}>${o.t}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  TOKEN — localStorage
+// ══════════════════════════════════════════════
+window.addEventListener('load', function(){
+  montarSelectMeses();
+  const saved = localStorage.getItem('iluminaboard_gh_token');
+  if(saved){
+    document.getElementById('gh-token').value = saved;
+    document.getElementById('remember-token').checked = true;
+  }
+  ['fi-oc','fi-mat','fi-prazos','fi-anexo','fi-cadastro'].forEach(setupFileInput);
+});
+
+function setupFileInput(inputId){
+  const key = inputId.replace('fi-','');
+  const slotId = 'slot-'+key;
+  document.getElementById(inputId).addEventListener('change', function(e){
+    const f = e.target.files[0];
+    if(!f) return;
+    const r = new FileReader();
+    r.onload = function(ev){
+      FILES[key] = ev.target.result;
+      document.getElementById('status-'+key).textContent = '✓ '+f.name;
+      document.getElementById('status-'+key).classList.add('ok');
+      document.getElementById(slotId).classList.add('done');
+      if(key==='anexo') document.getElementById('anexo-extra').style.display='block';
+      checkReady();
+    };
+    r.readAsArrayBuffer(f);
+  });
+}
+
+function checkReady(){
+  document.getElementById('btn-preview').disabled = !(FILES.oc || FILES.mat || FILES.prazos || FILES.anexo || FILES.cadastro);
+}
+
+// ══════════════════════════════════════════════
+//  UTILS DE PARSE (idênticos ao dashboard_operacional.html)
+// ══════════════════════════════════════════════
+const norm = (s) => String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function normOrig(orig){
+  const u = norm(orig);
+  if(u.includes('RONDA')) return 'ronda';
+  if(u.includes('TELE') || u.includes('TELEGER')) return 'tele';
+  if(u.includes('CALL') || u.includes('CENTRAL')) return 'callcenter';
+  if(u.includes('CHATBOT') || u.includes('BOT')) return 'chatbot';
+  if(u.includes('APP') || u.includes('APLICATIVO')) return 'app';
+  if(u.includes('INTERNET')||u.includes('WEB')||u.includes('PORTAL')||u.includes('EMAIL')) return 'internet';
+  return 'outros';
+}
+function mkCat(){ return {n:0,ok:0,nok:0,bairros:{},motivos:{},atrasos:[],tempoSoma:0,tempoN:0}; }
+function inc(obj,k){ if(k) obj[k]=(obj[k]||0)+1; }
+
+// Extrai "mmm/aa" de uma string de data em DD/MM/AAAA (padrão atual do Exati)
+// ou AAAA-MM-DD (padrão antigo). Retorna null se não reconhecer.
+function extrairMes(s){
+  let m = String(s||'').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return MESES_ABREV[+m[2]-1]+'/'+m[3].slice(2);
+  m = String(s||'').match(/(\d{4})-(\d{2})-\d{2}/);
+  if(m) return MESES_ABREV[+m[2]-1]+'/'+m[1].slice(2);
+  return null;
+}
+
+// Estrutura zerada de um mês — usada quando nenhuma planilha de ocorrências
+// é enviada e o mês ainda não existe no repositório.
+function defaultDadosMes(){
+  return {
+    mesDetectado:null, total_os:0,
+    atendidas:0, modernizacao:0, encontrado_normal:0, fora_escopo:0, projeto:0,
+    outro_atendimento:0, impossibilidade:0, repetido:0, nova_instalacao:0,
+    no_prazo:0, fora_prazo:0, prazo_contratual_h:48, tempo_medio_h:0,
+    equipe01:0, equipe02:0,
+    statusC:{}, tipoC:{}, solucaoC:{}, bairroC:{}, motivoC:{},
+    cats:{ronda:mkCat(),tele:mkCat(),callcenter:mkCat(),chatbot:mkCat(),app:mkCat(),internet:mkCat(),outros:mkCat()},
+    origem_ronda:0, origem_telegestao:0, origem_callcenter:0,
+    origem_chatbot:0, origem_app:0, origem_internet:0,
+    pontos:[],
+    cadastro:null
+  };
+}
+
+// Nota: a busca de base existente agora acontece diretamente em processarPreview()
+// (uma única vez por execução), reaproveitada tanto para merge quanto para o aviso de sobrescrita.
+
+function parseOcorrencias(ab){
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+
+  const statusC={},tipoC={},solucaoC={},bairroC={},motivoC={},equipeC={};
+  const cats={ronda:mkCat(),tele:mkCat(),callcenter:mkCat(),chatbot:mkCat(),app:mkCat(),internet:mkCat(),outros:mkCat()};
+  const mesCount={}; const tempos=[]; const pontos=[];
+
+  rows.forEach(row=>{
+    const status  = String(row['desc_status_atendimento_ps']||'').trim();
+    const tipo    = String(row['desc_tipo_ocorrencia']||'').trim();
+    const solucao = String(row['desc_solucao_atendimento_ps']||'').trim();
+    const bairro  = String(row['nome_bairro']||'').trim();
+    const motivo  = String(row['desc_motivo_atendimento_ps']||'').trim();
+    const equipe  = String(row['desc_equipe']||'').trim();
+    const prazoDesc = String(row['desc_prazo']||'').trim();
+    const prazoNum  = parseFloat(String(row['prazo']||0).replace(',','.'));
+    const origRaw = String(row['desc_tipo_origem_ocorrencia']||'').trim();
+    const catKey  = normOrig(origRaw);
+    const endereco = String(row['endereco']||'').trim();
+    const latNum = parseFloat(String(row['latitude']||'').replace(',','.'));
+    const lonNum = parseFloat(String(row['longitude']||'').replace(',','.'));
+    if(!isNaN(latNum)&&!isNaN(lonNum)&&latNum!==0&&lonNum!==0){
+      pontos.push({lat:+latNum.toFixed(6),lon:+lonNum.toFixed(6),endereco,bairro,motivo,status,origem:catKey});
+    }
+    if(!status) return;
+
+    inc(statusC,status); inc(tipoC,tipo);
+    if(solucao) inc(solucaoC,solucao);
+    if(bairro)  inc(bairroC,bairro);
+    if(motivo)  inc(motivoC,motivo);
+    if(equipe)  inc(equipeC,equipe);
+    if(!isNaN(prazoNum)&&prazoNum>0&&prazoNum<500) tempos.push(prazoNum);
+
+    const o = cats[catKey]||cats.outros;
+    o.n++;
+    if(!isNaN(prazoNum)&&prazoNum>0&&prazoNum<500){ o.tempoSoma+=prazoNum; o.tempoN++; }
+    const noPrazo = prazoDesc.toLowerCase().includes('no prazo');
+    if(noPrazo){ o.ok++; }
+    else {
+      o.nok++;
+      const ma=prazoDesc.match(/(\d+)d e (\d+)h e (\d+)m/i);
+      if(ma){
+        const dd=+ma[1],hh=+ma[2],mm2=+ma[3];
+        o.atrasos.push({label:(dd>0?dd+'d ':'')+'+'+hh+'h'+(mm2>0?mm2.toString().padStart(2,'0'):''),h:dd*24+hh+mm2/60,status,bairro,motivo});
+      }
+    }
+    if(bairro) inc(o.bairros,bairro);
+    if(motivo) inc(o.motivos,motivo);
+
+    // Mês de referência: prioriza a data de CONCLUSÃO do atendimento
+    // (reclamações do fim do mês anterior são concluídas no mês corrente).
+    const mesRow = extrairMes(row['data_conclusao_atendimento'])
+                || extrairMes(row['data_reclamacao'])
+                || extrairMes(row['data_ordem_servico']);
+    if(mesRow) inc(mesCount, mesRow);
+  });
+
+  // Mês mais frequente vence — evita que 1 OS atrasada de outro mês defina a detecção.
+  const mesDet = Object.entries(mesCount).sort((a,b)=>b[1]-a[1]).map(e=>e[0])[0] || '';
+
+  const total=Object.values(statusC).reduce((a,b)=>a+b,0);
+  const noP=Object.values(cats).reduce((a,c)=>a+c.ok,0);
+  const forP=Object.values(cats).reduce((a,c)=>a+c.nok,0);
+  const tempoMedio=tempos.length?+(tempos.reduce((a,b)=>a+b)/tempos.length).toFixed(1):0;
+
+  return{
+    mesDetectado: mesDet||null, total_os:total,
+    atendidas:statusC['Atendido']||0,
+    modernizacao:statusC['Modernização']||0,
+    encontrado_normal:statusC['Encontrado normal']||0,
+    fora_escopo:statusC['Fora do escopo do contrato']||0,
+    projeto:statusC['Projeto']||0,
+    outro_atendimento:statusC['Outro Atendimento']||0,
+    impossibilidade:statusC['Impossibilidade']||0,
+    repetido:statusC['Repetido']||0,
+    nova_instalacao:statusC['Nova Instalação']||0,
+    no_prazo:noP, fora_prazo:forP,
+    prazo_contratual_h:48, tempo_medio_h:tempoMedio,
+    equipe01:equipeC['Equipe 01']||0, equipe02:equipeC['Equipe 02']||0,
+    statusC, tipoC, solucaoC, bairroC, motivoC, cats,
+    origem_ronda:cats.ronda.n, origem_telegestao:cats.tele.n,
+    origem_callcenter:cats.callcenter.n, origem_chatbot:cats.chatbot.n,
+    origem_app:cats.app.n, origem_internet:cats.internet.n,
+    pontos
+  };
+}
+
+function parseMateriais(ab,d){
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+  const mats={};
+  rows.forEach(row=>{
+    const nome=String(row['Descrição']||row['Descricao']||row['DESCRIÇÃO']||row['descricao']||'').trim();
+    const qty=parseFloat(String(row['Quantidade']||row['QTD']||row['Qtd']||row['quantidade']||row['QUANTIDADE']||0).replace(',','.'))||0;
+    if(nome&&qty>0) mats[nome]=(mats[nome]||0)+qty;
+  });
+  const mq=(...keys)=>Object.entries(mats).filter(([k])=>keys.some(kk=>norm(k).includes(norm(kk)))).reduce((a,[,v])=>a+v,0);
+
+  d.mat_rele_sgip = mq('SGIP','SMARTGREEN','FOTOELETRICO SMARTGREEN','RELE SGIP','RELE FOTOELETRICO');
+  d.mat_rele_nf   = Object.entries(mats).filter(([k])=>norm(k).includes('RELE')&&!norm(k).includes('SGIP')&&!norm(k).includes('SMARTGREEN')).reduce((a,[,v])=>a+v,0);
+  d.mat_led30w    = mq('LED 30W','30W REEME','30W - REEME');
+  d.mat_led40w    = mq('LED 40W','40W REEME','40W - REEME');
+  d.mat_led70w    = mq('LED 70W','70W REEME','70W - REEME');
+  d.mat_led120w   = mq('LED 120W','120W REEME','120W - REEME');
+  d.mat_argos     = mq('ARGOS');
+  d.mat_conector2 = mq('TIPO II','TIPO 2');
+  d.mat_conector1 = mq('TIPO I (CINZA)','TIPO I CINZA');
+  d.mat_braco     = mq('BRACO','BRAÇO');
+  d.mat_bocal     = mq('BOCAL');
+
+  d.materiais_top   = Object.entries(mats).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([nome,qty])=>({nome,qty:Math.round(qty)}));
+  d.materiais_total = Object.values(mats).reduce((a,b)=>a+b,0);
+  d.materiais_tipos = Object.keys(mats).length;
+  return d;
+}
+
+// ══════════════════════════════════════════════
+//  PRAZOS — relatório oficial "ConsultarPrazosAtendimento-XXXX.xlsx"
+//  Fonte autoritativa de No Prazo / Fora do Prazo (usa os totais do rodapé).
+// ══════════════════════════════════════════════
+function parsePrazos(ab){
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+  // Localiza a linha de cabeçalho ("Atendimento" na 1ª coluna)
+  let hIdx=-1, colStatus=-1, colOrigem=-1;
+  rows.forEach((r,i)=>{
+    if(hIdx<0 && norm(r[0])==='ATENDIMENTO'){
+      hIdx=i;
+      r.forEach((c,j)=>{
+        const n=norm(c);
+        if(n==='STATUS') colStatus=j;
+        if(n.includes('ORIGEM')) colOrigem=j;
+      });
+    }
+  });
+  if(hIdx<0) throw new Error('Relatório de prazos não reconhecido (cabeçalho "Atendimento" não encontrado).');
+
+  let noPrazo=0, foraPrazo=0, avulsos=null;
+  let totNo=null, totFora=null;
+  const porOrigem={};
+
+  rows.forEach((r,i)=>{
+    // Rodapé de totais (qualquer coluna com o rótulo, valor na coluna seguinte)
+    r.forEach((c,j)=>{
+      const n=norm(c);
+      const val=parseInt(r[j+1]);
+      if(n.includes('TOTAL FORA DO PRAZO') && !isNaN(val)) totFora=val;
+      if(n.includes('TOTAL NO PRAZO') && !isNaN(val)) totNo=val;
+      if(n.includes('AVULSOS') && !isNaN(val)) avulsos=val;
+    });
+    // Linhas de dados: id numérico na 1ª coluna, após o cabeçalho
+    if(i>hIdx && r[0]!=='' && !isNaN(parseFloat(r[0]))){
+      const st=norm(r[colStatus]);
+      const ok = st.includes('NO PRAZO');
+      const nok = st.includes('FORA');
+      if(ok) noPrazo++; else if(nok) foraPrazo++;
+      if(ok||nok){
+        const k=normOrig(r[colOrigem]);
+        if(!porOrigem[k]) porOrigem[k]={ok:0,nok:0};
+        porOrigem[k][ok?'ok':'nok']++;
+      }
+    }
+  });
+
+  return {
+    noPrazo: totNo!=null?totNo:noPrazo,
+    foraPrazo: totFora!=null?totFora:foraPrazo,
+    avulsos, porOrigem,
+    fonteTotais: totNo!=null?'rodapé do relatório':'contagem de linhas'
+  };
+}
+
+function cellVal(ws,row,col){
+  const addr = XLSX.utils.encode_cell({r:row-1,c:col-1});
+  const cell = ws[addr];
+  return cell ? cell.v : undefined;
+}
+function sf(v){
+  if(v==null) return null;
+  const s = String(v).replace(',','.').trim();
+  if(!s || s==='#DIV/0!' || s==='#VALUE!') return null;
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+function parseAnexo1(ab, diasNoMes, lig, nOp){
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+
+  const cmm = sf(cellVal(ws,12,3));
+  const fm  = sf(cellVal(ws,13,3));
+  const pt  = sf(cellVal(ws,23,3)) || 0;
+  const nf  = sf(cellVal(ws,21,3)) || 0;
+  const ni  = sf(cellVal(ws,22,3)) || 0;
+  const ncei = sf(cellVal(ws,37,3)) || 0;
+  const ncea = sf(cellVal(ws,38,3)) || 0;
+  const ncnei= sf(cellVal(ws,54,3)) || 0;
+  const ncnea= sf(cellVal(ws,55,3)) || 0;
+  const ti   = sf(cellVal(ws,70,3)) || 0;
+  const dm   = diasNoMes || 30;
+
+  const sla1_pct = sf(cellVal(ws,26,8)) ?? sf(cellVal(ws,20,3));
+  const sla1_ind = sf(cellVal(ws,28,4)) ?? sf(cellVal(ws,26,4));
+  const sla2_pct = sf(cellVal(ws,41,8)) ?? sf(cellVal(ws,36,3));
+  const sla2_ind = sf(cellVal(ws,43,4)) ?? sf(cellVal(ws,41,4));
+  const sla3_pct = sf(cellVal(ws,58,8)) ?? sf(cellVal(ws,53,3));
+  const sla3_ind = sf(cellVal(ws,60,4)) ?? sf(cellVal(ws,58,4));
+  const sla4_pct = sf(cellVal(ws,73,8)) ?? sf(cellVal(ws,68,3));
+  const sla4_ind = sf(cellVal(ws,75,4)) ?? sf(cellVal(ws,73,4));
+  const sla5_val = sf(cellVal(ws,82,3));
+  const sla5_ind = sf(cellVal(ws,90,4)) ?? sf(cellVal(ws,89,4));
+
+  let ie_calc = null;
+  const vals=[sla1_ind,sla2_ind,sla3_ind,sla4_ind,sla5_ind];
+  const pesos=[0.4,0.2,0.2,0.1,0.1];
+  if(vals.every(v=>v!=null)){
+    ie_calc = Math.round(vals.reduce((a,v,i)=>a+v*pesos[i],0)*10000)/10000;
+  }
+  const ieEfetivo = (ie_calc!=null && ie_calc>=0.91) ? 1.0 : ie_calc;
+
+  const pRuim = Math.round((sf(cellVal(ws,86,4))||0)*1000)/10;
+  const pReg  = Math.round((sf(cellVal(ws,87,4))||0)*1000)/10;
+  const pBom  = Math.round((sf(cellVal(ws,88,4))||0)*1000)/10;
+  const pOtimo= Math.round((sf(cellVal(ws,89,4))||0)*1000)/10;
+
+  return {
+    contraprestacao: {
+      cmm, cme: (cmm!=null&&fm!=null&&ieEfetivo!=null) ? Math.round(cmm*fm*ieEfetivo*100)/100 : null,
+      fm, fe: ie_calc, ie: ie_calc,
+      sla1_pct, sla1_ind, sla2_pct, sla2_ind, sla3_pct, sla3_ind,
+      ncne_i:ncnei, ncne_a:ncnea, sla4_pct, sla4_ind, sla5_val, sla5_ind
+    },
+    dadosSla: {
+      CMM:cmm, FM:fm, Nf:Math.round(nf), Ni:Math.round(ni), Pt:Math.round(pt),
+      NCEi:Math.round(ncei), NCEa:Math.round(ncea), NCNEi:Math.round(ncnei), NCNEa:Math.round(ncnea),
+      Dm:dm, Ti:Math.round(ti), pOtimo, pBom, pReg, pRuim, lig:lig||0, nOp:nOp||0
+    }
+  };
+}
+
+// ══════════════════════════════════════════════
+//  PARSER: VALIDAÇÃO DE CADASTRO
+//  Relatório "Relatorio_amostras_atributos_laudo_XXXX.xlsx" — amostragem mensal
+//  de pontos de IP com atributos coletados em campo (poste, cabo, rede, etc.)
+//  para validar/completar o cadastro no sistema.
+// ══════════════════════════════════════════════
+function parseCadastro(ab){
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+
+  function incCat(obj,v){
+    let k = String(v||'').trim();
+    if(!k) k='Não informado';
+    // Normaliza pequenas variações de grafia do mesmo atributo
+    if(norm(k)==='POSTE DUPLO T') k='Duplo T';
+    obj[k]=(obj[k]||0)+1;
+  }
+
+  const c = {
+    total: rows.length, avaliados: 0,
+    preenchidos_sim: 0, preenchidos_nao: 0,
+    por_bairro:{}, por_regiao:{}, por_equipe:{},
+    tipo_poste:{}, tipo_cabo:{}, tipo_rede:{}, tipo_comando:{},
+    estrutura_posteacao:{}, classe_via:{}, classe_pedestre:{},
+    distribuidora:{}, finalidade:{}, fase_alimentacao:{},
+    arvore_conflitando:0, poste_exclusivo_ip:0, medidor_sim:0,
+    mesDetectado:null
+  };
+
+  const mesCount={};
+
+  rows.forEach(row=>{
+    if(norm(row['Status'])==='AVALIADO') c.avaliados++;
+    if(norm(row['Preenchido'])==='SIM') c.preenchidos_sim++; else c.preenchidos_nao++;
+
+    incCat(c.por_bairro, row['Bairro']);
+    incCat(c.por_regiao, row['Região']);
+    incCat(c.por_equipe, row['Equipe']);
+    incCat(c.tipo_poste, row['Tipo do Poste']);
+    incCat(c.tipo_cabo, row['Tipo do Cabo']);
+    incCat(c.tipo_rede, row['Tipo da Rede']);
+    incCat(c.tipo_comando, row['Tipo Comando']);
+    incCat(c.estrutura_posteacao, row['Estrutura Posteação']);
+    incCat(c.classe_via, row['Classe Via']);
+    incCat(c.classe_pedestre, row['Classe Pedestre']);
+    incCat(c.distribuidora, row['Distribuidora']);
+    incCat(c.finalidade, row['Finalidade']);
+    incCat(c.fase_alimentacao, row['Fase de alimentação elétrica']);
+
+    if(norm(row['Árvore conflitando ponto de luz?'])==='SIM') c.arvore_conflitando++;
+    if(norm(row['Poste Exclusivo IP'])==='SIM') c.poste_exclusivo_ip++;
+    if(norm(row['Medidor'])==='SIM') c.medidor_sim++;
+
+    const m = extrairMes(row['Data']);
+    if(m) mesCount[m]=(mesCount[m]||0)+1;
+  });
+
+  c.mesDetectado = Object.entries(mesCount).sort((a,b)=>b[1]-a[1]).map(e=>e[0])[0] || null;
+  c.pct_avaliados  = c.total ? +(c.avaliados/c.total*100).toFixed(1) : 0;
+  c.pct_preenchido = c.total ? +(c.preenchidos_sim/c.total*100).toFixed(1) : 0;
+
+  return c;
+}
+
+// ══════════════════════════════════════════════
+//  PREVIEW
+// ══════════════════════════════════════════════
+async function processarPreview(){
+  try{
+    if(!FILES.oc && !FILES.mat && !FILES.prazos && !FILES.anexo && !FILES.cadastro){
+      alert('Selecione ao menos um arquivo no Passo 3 antes de pré-visualizar.');
+      return;
+    }
+
+    const tokenChk = document.getElementById('gh-token').value.trim();
+    const sel = document.getElementById('mes-select');
+    let mesSelecionado = sel.value;
+    document.getElementById('mes-existente-aviso').innerHTML = '';
+
+    // Busca a base já publicada UMA única vez — serve tanto para preservar campos que
+    // esta rodada não está reenviando (materiais, contraprestação, cadastro, prazos)
+    // quanto para o aviso de sobrescrita.
+    let existenteRemoto = null;
+    if(tokenChk){
+      try{
+        const opAtual = await ghGetFile(tokenChk, 'dados_operacional.json');
+        if(opAtual.data.meses && opAtual.data.meses[mesSelecionado]){
+          existenteRemoto = opAtual.data.meses[mesSelecionado];
+        }
+      }catch(e){ log('Não foi possível checar dados existentes: '+e.message, 'warn'); }
+    } else {
+      log('Sem token informado — não é possível checar/preservar dados já publicados.', 'warn');
+    }
+
+    let d;
+    if(FILES.oc){
+      log('Processando planilha de ocorrências…');
+      const dOc = parseOcorrencias(FILES.oc);
+      document.getElementById('mes-detectado').value = dOc.mesDetectado || '— não detectado —';
+
+      // Auto-seleciona o mês detectado, se existir nas opções
+      if(dOc.mesDetectado && [...sel.options].some(o=>o.value===dOc.mesDetectado)){
+        sel.value = dOc.mesDetectado;
+        mesSelecionado = dOc.mesDetectado;
+        log('Mês detectado: '+dOc.mesDetectado.toUpperCase()+' (selecionado automaticamente).', 'ok');
+        // O mês mudou após a auto-seleção — refaz a checagem de base com o mês certo.
+        if(tokenChk){
+          try{
+            const opAtual2 = await ghGetFile(tokenChk, 'dados_operacional.json');
+            existenteRemoto = (opAtual2.data.meses && opAtual2.data.meses[mesSelecionado]) || null;
+          }catch(e){ /* mantém o que já tinha */ }
+        }
+      } else if(dOc.mesDetectado && dOc.mesDetectado!==mesSelecionado){
+        document.getElementById('mes-existente-aviso').innerHTML =
+          '<div class="info-box info-amber">⚠ A planilha indica <strong>'+dOc.mesDetectado.toUpperCase()+
+          '</strong>, mas você selecionou <strong>'+mesSelecionado.toUpperCase()+
+          '</strong>. Confira antes de publicar — o sistema usará o mês selecionado no passo 2.</div>';
+      }
+
+      // Mescla: os campos da nova planilha de ocorrências prevalecem, mas o que ela não
+      // produz (materiais, contraprestação, cadastro, fonte de prazos…) vem da base existente.
+      d = Object.assign({}, existenteRemoto || {}, dOc);
+    } else {
+      document.getElementById('mes-detectado').value = '— ocorrências não enviadas —';
+      if(existenteRemoto){
+        log('Ocorrências não enviadas — usando dados existentes de '+mesSelecionado.toUpperCase()+' como base para atualização parcial.', 'warn');
+        d = JSON.parse(JSON.stringify(existenteRemoto));
+      } else {
+        log('Ocorrências não enviadas e mês inexistente no repositório — iniciando com valores zerados.', 'warn');
+        d = defaultDadosMes();
+      }
+    }
+
+    if(existenteRemoto){
+      document.getElementById('mes-existente-aviso').innerHTML +=
+        '<div class="info-box info-amber">⚠ O mês <strong>'+mesSelecionado.toUpperCase()+
+        '</strong> já existe no repositório e será <strong>sobrescrito</strong> ao publicar (campos não reenviados nesta rodada são preservados).</div>';
+    }
+
+    if(FILES.prazos){
+      log('Processando relatório oficial de prazos…');
+      const pz = parsePrazos(FILES.prazos);
+      if(FILES.oc){
+        const derivNo = d.no_prazo, derivFora = d.fora_prazo;
+        if(derivNo===pz.noPrazo && derivFora===pz.foraPrazo){
+          log('Prazos conferem: '+pz.noPrazo+' no prazo / '+pz.foraPrazo+' fora ('+pz.fonteTotais+').', 'ok');
+        } else {
+          log('Divergência de prazos — ocorrências: '+derivNo+'/'+derivFora+' · relatório oficial: '+
+              pz.noPrazo+'/'+pz.foraPrazo+'. Prevalece o relatório oficial.', 'warn');
+        }
+      } else {
+        log('Prazos oficiais aplicados: '+pz.noPrazo+' no prazo / '+pz.foraPrazo+' fora.', 'ok');
+      }
+      d.no_prazo = pz.noPrazo;
+      d.fora_prazo = pz.foraPrazo;
+      d.prazos_fonte = 'ConsultarPrazosAtendimento';
+      if(pz.avulsos!=null) d.prazos_avulsos = pz.avulsos;
+      // Alinha ok/nok por origem com o relatório oficial (mantém bairros/motivos/atrasos)
+      Object.entries(pz.porOrigem).forEach(([k,v])=>{
+        if(d.cats[k]){ d.cats[k].ok=v.ok; d.cats[k].nok=v.nok; }
+      });
+    } else if(FILES.oc){
+      log('Relatório de prazos não enviado — usando prazos derivados da planilha de ocorrências.', 'warn');
+    } else {
+      log('Prazos não enviados — mantendo no_prazo/fora_prazo já existentes na base.', 'warn');
+    }
+
+    if(FILES.mat){
+      log('Processando planilha de materiais…');
+      parseMateriais(FILES.mat, d);
+    } else if(!FILES.oc){
+      log('Materiais não enviados — mantendo valores já existentes na base.', 'warn');
+    }
+
+    let anexoResult = null;
+    if(FILES.anexo){
+      log('Processando ANEXO_1 (contraprestação)…');
+      const mesAbrev = mesSelecionado.split('/')[0];
+      const dias = DIAS_MES[mesAbrev] || 30;
+      const lig = parseInt(document.getElementById('lig-input').value)||0;
+      const nOp = parseInt(document.getElementById('nop-input').value)||0;
+      anexoResult = parseAnexo1(FILES.anexo, dias, lig, nOp);
+      d.contraprestacao = anexoResult.contraprestacao;
+    } else if(d.contraprestacao){
+      log('ANEXO_1 não enviado — dados de contraprestação mantidos, dados.json (SLA) não será alterado.', 'warn');
+    }
+
+    if(FILES.cadastro){
+      log('Processando relatório de Validação de Cadastro…');
+      d.cadastro = parseCadastro(FILES.cadastro);
+      log(d.cadastro.total+' amostras processadas · '+d.cadastro.pct_preenchido+'% com cadastro preenchido.', 'ok');
+      if(d.cadastro.mesDetectado && d.cadastro.mesDetectado!==mesSelecionado){
+        document.getElementById('mes-existente-aviso').innerHTML +=
+          '<div class="info-box info-amber">⚠ O relatório de Validação de Cadastro indica <strong>'+
+          d.cadastro.mesDetectado.toUpperCase()+'</strong>, diferente do mês selecionado (<strong>'+
+          mesSelecionado.toUpperCase()+'</strong>). Confira antes de publicar.</div>';
+      }
+    } else if(d.cadastro){
+      log('Validação de Cadastro não enviada — mantendo dados já existentes na base.', 'warn');
+    }
+
+    PREVIEW_DATA = { mes: mesSelecionado, d, anexo: anexoResult };
+
+    renderPreview(d, anexoResult, mesSelecionado);
+    document.getElementById('btn-publish').disabled = false;
+    log('✓ Pré-visualização concluída.', 'ok');
+  }catch(e){
+    log('✗ Erro ao processar: '+e.message, 'err');
+    console.error(e);
+  }
+}
+
+function renderPreview(d, anexo, mes){
+  const card = document.getElementById('preview-card');
+  card.style.display = 'block';
+  document.getElementById('preview-title').textContent = '📊 Pré-visualização — '+mes.toUpperCase();
+  document.getElementById('preview-sub').textContent = FILES.oc
+    ? (d.total_os+' OS processadas a partir da planilha')
+    : 'Atualização parcial — dados de ocorrências mantidos da base existente';
+
+  const sla = d.total_os ? Math.round(d.no_prazo/d.total_os*1000)/10 : 0;
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = `
+    <div class="pv-card"><div class="pv-label">Total OS</div><div class="pv-val">${d.total_os}</div></div>
+    <div class="pv-card"><div class="pv-label">SLA</div><div class="pv-val" style="color:${sla>=98?'#1a8a3c':sla>=95?'#c47900':'#d42b2b'}">${sla}%</div></div>
+    <div class="pv-card"><div class="pv-label">Ronda Própria</div><div class="pv-val" style="color:#008fa8">${d.cats.ronda.n}</div></div>
+    <div class="pv-card"><div class="pv-label">Tele Gestão</div><div class="pv-val" style="color:#0077a0">${d.cats.tele.n}</div></div>
+    <div class="pv-card"><div class="pv-label">Call Center</div><div class="pv-val" style="color:#1a52b0">${d.cats.callcenter.n}</div></div>
+    <div class="pv-card"><div class="pv-label">Atrasos</div><div class="pv-val" style="color:#d42b2b">${d.fora_prazo}</div></div>
+    <div class="pv-card"><div class="pv-label">Equipe 01</div><div class="pv-val">${d.equipe01}</div></div>
+    <div class="pv-card"><div class="pv-label">Equipe 02</div><div class="pv-val">${d.equipe02}</div></div>
+  `;
+
+  let extra = '';
+  if(d.materiais_top){
+    extra += '<div class="info-box info-teal">🔧 <strong>'+d.materiais_total+' itens</strong> de material em '+d.materiais_tipos+' tipos. Top: '+d.materiais_top.slice(0,3).map(m=>m.nome+' ('+m.qty+')').join(', ')+'</div>';
+  }
+  if(anexo){
+    const c = anexo.contraprestacao;
+    extra += '<div class="info-box info-green">💰 CMM: R$ '+(c.cmm||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+
+      ' · FM: '+c.fm+' · IE: '+(c.ie!=null?c.ie.toFixed(4):'—')+
+      ' · CME: R$ '+(c.cme||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>';
+  }
+  if(d.pontos.length){
+    extra += '<div class="info-box info-teal">🗺️ '+d.pontos.length+' pontos com coordenadas GPS válidas ('+Math.round(d.pontos.length/d.total_os*100)+'% de cobertura).</div>';
+  }
+  if(d.cadastro){
+    extra += '<div class="info-box info-teal">🗂️ <strong>'+d.cadastro.total+' amostras</strong> de Validação de Cadastro · '+
+      d.cadastro.pct_preenchido+'% com cadastro preenchido · '+d.cadastro.avaliados+' avaliadas.</div>';
+  }
+  document.getElementById('preview-extra').innerHTML = extra;
+}
+
+// ══════════════════════════════════════════════
+//  LOG
+// ══════════════════════════════════════════════
+function log(msg, type){
+  const area = document.getElementById('log-area');
+  area.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'log-line'+(type==='ok'?' log-ok':type==='err'?' log-err':type==='warn'?' log-warn':'');
+  line.textContent = (type==='ok'?'✓ ':type==='err'?'✗ ':'• ') + msg.replace(/^[✓✗]\s*/,'');
+  area.appendChild(line);
+  area.scrollTop = area.scrollHeight;
+}
+
+// ══════════════════════════════════════════════
+//  GITHUB API
+// ══════════════════════════════════════════════
+async function ghGetFile(token, path){
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
+    headers: { 'Authorization': 'token '+token }
+  });
+  if(!res.ok) throw new Error('Falha ao buscar '+path+' (HTTP '+res.status+')');
+  const json = await res.json();
+  const content = decodeURIComponent(escape(atob(json.content.replace(/\n/g,''))));
+  return { sha: json.sha, data: JSON.parse(content) };
+}
+
+async function ghPutFile(token, path, sha, dataObj, message){
+  const jsonStr = JSON.stringify(dataObj, null, 2);
+  const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+    method: 'PUT',
+    headers: { 'Authorization': 'token '+token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, content: b64, sha, branch: BRANCH })
+  });
+  if(!res.ok){
+    const errBody = await res.json().catch(()=>({}));
+    throw new Error('Falha ao publicar '+path+' (HTTP '+res.status+'): '+(errBody.message||''));
+  }
+  return await res.json();
+}
+
+function nowStr(){
+  const d = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+
+async function publicarGitHub(){
+  const token = document.getElementById('gh-token').value.trim();
+  if(!token){ alert('Informe o token do GitHub no Passo 1.'); return; }
+  if(!PREVIEW_DATA){ alert('Clique em "Pré-visualizar Dados" antes de publicar.'); return; }
+
+  if(document.getElementById('remember-token').checked){
+    localStorage.setItem('iluminaboard_gh_token', token);
+  } else {
+    localStorage.removeItem('iluminaboard_gh_token');
+  }
+
+  const btn = document.getElementById('btn-publish');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Publicando…';
+
+  const { mes, d, anexo } = PREVIEW_DATA;
+
+  try{
+    // ── 1. dados_operacional.json ──
+    log('Buscando dados_operacional.json atual no repositório…');
+    const opFile = await ghGetFile(token, 'dados_operacional.json');
+    const novoMes = Object.assign({}, d, { mes });
+    delete novoMes.mesDetectado;
+    opFile.data.meses[mes] = novoMes;
+    opFile.data.ultima_atualizacao = nowStr();
+    log('Publicando dados_operacional.json…');
+    await ghPutFile(token, 'dados_operacional.json', opFile.sha, opFile.data,
+      'data: atualiza '+mes+' via publicar_dados.html — '+d.total_os+' OS');
+    log('dados_operacional.json publicado com sucesso.', 'ok');
+
+    // ── 2. dados.json (apenas se ANEXO_1 foi enviado) ──
+    if(anexo){
+      log('Buscando dados.json (SLAs) atual no repositório…');
+      const slaFile = await ghGetFile(token, 'dados.json');
+      slaFile.data.meses[mes] = Object.assign({mes: mes}, anexo.dadosSla);
+      slaFile.data.ultima_atualizacao = mes;
+      log('Publicando dados.json…');
+      await ghPutFile(token, 'dados.json', slaFile.sha, slaFile.data,
+        'data: atualiza SLAs de '+mes+' via publicar_dados.html');
+      log('dados.json publicado com sucesso.', 'ok');
+    } else {
+      log('ANEXO_1 não enviado — dados.json (SLAs) não foi alterado.', 'warn');
+    }
+
+    log('🎉 Publicação concluída! As alterações aparecerão no GitHub Pages em até 2 minutos.', 'ok');
+    document.getElementById('preview-extra').innerHTML += 
+      '<div class="info-box info-green" style="margin-top:10px">✅ Publicado! Acesse: '+
+      '<a href="dashboard_operacional.html" target="_blank">dashboard_operacional.html</a>'+
+      (anexo?' · <a href="dashboard_sla.html" target="_blank">dashboard_sla.html</a>':'')+'</div>';
+
+  }catch(e){
+    log('✗ '+e.message, 'err');
+    alert('Erro ao publicar: '+e.message);
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '☁️ Publicar no GitHub';
+  }
+}
+</script>
+</body>
+</html>

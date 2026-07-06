@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EXEMPLO · Proposta de Recálculo dos SLAs (ANEXO VIII)</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#e8edf3;--card:#ffffff;
+  --border:#d1dae6;--border2:#b8c5d3;
+  --teal:#008fa8;--amber:#c47900;--red:#d42b2b;--green:#1a8a3c;--blue:#1a52b0;--purple:#7b35b8;--gray:#5a6e82;
+  --text:#1a2535;--muted:#5a6e82;
+  --shadow:0 1px 4px rgba(0,0,0,.10),0 2px 12px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+.exemplo-banner{background:repeating-linear-gradient(45deg,#7b35b8,#7b35b8 14px,#6c2ba0 14px,#6c2ba0 28px);
+  color:#fff;text-align:center;padding:10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:.85rem;letter-spacing:.08em;text-transform:uppercase}
+
+.header{background:linear-gradient(135deg,#1a2a40 0%,#1e3554 100%);
+  border-bottom:2px solid #b8c5d3;padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.h-brand{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:.03em}
+.h-brand em{font-style:normal;color:#00d4c8}
+.h-sub{color:#a0b4c8;font-size:.74rem;margin-top:2px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}
+
+.sec{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);margin:28px 0 12px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:14px;
+  font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.status-ok{background:rgba(26,138,60,.1);color:var(--green);border:1px solid rgba(26,138,60,.3)}
+.status-blocked{background:rgba(212,43,43,.08);color:var(--red);border:1px solid rgba(212,43,43,.3)}
+.status-partial{background:rgba(196,121,0,.1);color:var(--amber);border:1px solid rgba(196,121,0,.3)}
+.status-manual{background:rgba(26,82,176,.08);color:var(--blue);border:1px solid rgba(26,82,176,.3)}
+
+.sla-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.sla-title{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800}
+.sla-peso{font-size:.7rem;color:var(--muted);background:var(--surface);padding:3px 10px;border-radius:6px;font-weight:700}
+
+.formula-box{background:#f7f9fb;border:1px solid var(--border);border-radius:8px;padding:12px 16px;
+  font-family:monospace;font-size:.84rem;color:#2d4159;margin-bottom:14px}
+
+.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.source-grid{grid-template-columns:1fr}}
+.source-item{background:var(--surface);border-radius:8px;padding:12px 14px}
+.source-label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.source-val{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800}
+.source-origin{font-size:.7rem;color:var(--muted);margin-top:3px}
+
+.result-row{display:flex;align-items:center;justify-content:space-between;background:#f7f9fb;
+  border-radius:8px;padding:14px 18px;margin-top:10px}
+.result-label{font-size:.78rem;color:var(--muted)}
+.result-val{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900}
+
+.warn-box{background:rgba(212,43,43,.04);border:1px solid rgba(212,43,43,.2);border-radius:8px;
+  padding:14px 16px;font-size:.8rem;color:#8a1f1f;line-height:1.6;margin-top:10px}
+.warn-box strong{color:var(--red)}
+.info-box{background:#f0f9fb;border:1px solid rgba(0,143,168,.2);border-radius:8px;
+  padding:14px 16px;font-size:.8rem;color:#0d4a56;line-height:1.6;margin-top:10px}
+.manual-box{background:rgba(26,82,176,.05);border:1px solid rgba(26,82,176,.2);border-radius:8px;
+  padding:14px 16px;font-size:.8rem;color:#1a3a6b;line-height:1.6;margin-top:10px}
+
+.ie-final{background:linear-gradient(135deg,#1a2a40,#1e3554);border-radius:14px;padding:28px;color:#fff;text-align:center}
+.ie-final .num{font-family:'Barlow Condensed',sans-serif;font-size:3.5rem;font-weight:900;color:#00d4c8}
+.ie-breakdown{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:16px}
+.ie-piece{text-align:center}
+.ie-piece .val{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800}
+.ie-piece .lbl{font-size:.66rem;color:#a0b4c8;text-transform:uppercase;letter-spacing:.04em}
+.ie-piece.pending .val{color:#fbbf24}
+
+.questions-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.questions-list li{display:flex;gap:10px;font-size:.82rem;line-height:1.6}
+.q-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--purple);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;font-family:'Barlow Condensed',sans-serif}
+</style>
+</head>
+<body>
+
+<div class="exemplo-banner">⚠️ PÁGINA DE EXEMPLO — NÃO É O DASHBOARD OFICIAL — PARA DISCUSSÃO E VALIDAÇÃO ⚠️</div>
+
+<div class="header">
+  <div>
+    <div class="h-brand">PROPOSTA · <em>RECÁLCULO DOS SLAs</em></div>
+    <div class="h-sub">Conforme ANEXO VIII do contrato · Dados reais de referência: MAIO/2026</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card" style="border-left:4px solid var(--purple)">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:8px">📋 Sobre esta página</div>
+    <div style="font-size:.84rem;color:var(--muted);line-height:1.7">
+      Esta é uma <strong>prévia/exemplo</strong> de como os 5 SLAs contratuais ficariam recalculados seguindo
+      exatamente a metodologia do ANEXO VIII, usando dados reais de maio/2026 onde já é possível.
+      Nenhum dashboard em produção foi alterado — isso é só para validarmos a metodologia antes de implementar.
+    </div>
+  </div>
+
+  <!-- ═══════════════ SLA 1 ═══════════════ -->
+  <div class="sec">SLA 1 — Percentual de Pontos Acesos (PPA)</div>
+  <div class="card" style="border-top:3px solid var(--green)">
+    <div class="sla-head">
+      <div class="sla-title">SLA 1 — PPA</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sla-peso">Peso 40%</span>
+        <span class="status-pill status-ok">✓ Calculável agora</span>
+      </div>
+    </div>
+    <div class="formula-box">PPA (%) = 1 − (Nf − Ni) / Pt</div>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="source-label">Nf — Falhas geradas no mês</div>
+        <div class="source-val" style="color:var(--teal)">240</div>
+        <div class="source-origin">Confirmado por você (relatório SGR de maio/26)</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Ni — Intervenções com sucesso</div>
+        <div class="source-val" style="color:var(--green)">112</div>
+        <div class="source-origin">Confirmado por você</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Pt — Número de Pontos Comunicando</div>
+        <div class="source-val" style="color:var(--blue)">15.881</div>
+        <div class="source-origin">Confirmado por você, posição em 31/05/2026</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">PPA calculado</div>
+        <div class="source-val" style="color:var(--green)">99,19%</div>
+        <div class="source-origin">1 − (240−112)/15.881</div>
+      </div>
+    </div>
+    <div class="result-row">
+      <div class="result-label">Faixa: 99,19% ≥ 99,01% → <strong>Indicador máximo da tabela</strong></div>
+      <div class="result-val" style="color:var(--green)">100%</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SLA 2 ═══════════════ -->
+  <div class="sec">SLA 2 — Chamados de Emergência (PCE)</div>
+  <div class="card" style="border-top:3px solid var(--green)">
+    <div class="sla-head">
+      <div class="sla-title">SLA 2 — PCE</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sla-peso">Peso 20%</span>
+        <span class="status-pill status-ok">✓ Resolvido</span>
+      </div>
+    </div>
+    <div class="formula-box">PCE (%) = NCEa / NCEi &nbsp;&nbsp;|&nbsp;&nbsp; prazo contratual: <strong>4 horas</strong></div>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="source-label">NCEi — Chamados de emergência identificados</div>
+        <div class="source-val" style="color:var(--teal)">0</div>
+        <div class="source-origin">O sistema Exati não classifica nenhuma OS como emergência (risco à vida/segurança)</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">NCEa — Chamados de emergência atendidos</div>
+        <div class="source-val" style="color:var(--green)">0</div>
+        <div class="source-origin">Mesma base — não há chamado de emergência no período</div>
+      </div>
+    </div>
+    <div class="result-row">
+      <div class="result-label">NCEi = 0 → sem chamados de emergência no mês → 100% por definição</div>
+      <div class="result-val" style="color:var(--green)">100%</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SLA 3 ═══════════════ -->
+  <div class="sec">SLA 3 — Chamados Não Emergenciais (PCNE)</div>
+  <div class="card" style="border-top:3px solid var(--green)">
+    <div class="sla-head">
+      <div class="sla-title">SLA 3 — PCNE</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sla-peso">Peso 20%</span>
+        <span class="status-pill status-ok">✓ Resolvido</span>
+      </div>
+    </div>
+    <div class="formula-box">PCNE (%) = NCNEa / NCNEi &nbsp;&nbsp;|&nbsp;&nbsp; prazo: <strong>48 horas úteis</strong></div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      📐 O contrato (ANEXO VIII) define 9 subcategorias com prazos de 24h a 120h úteis. Como o sistema Exati
+      não classifica as ocorrências nessas 9 categorias, foi definida uma <strong>regra simplificada e prática</strong>:
+    </div>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="source-label">NCNEi — Chamados não emergenciais identificados</div>
+        <div class="source-val" style="color:var(--teal)">53</div>
+        <div class="source-origin">Todas as OS de origem <strong>diferente</strong> de Ronda Própria e Tele Gestão (Call Center + Chatbot + App + Internet)</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">NCNEa — Atendidos dentro do prazo (ajustado)</div>
+        <div class="source-val" style="color:var(--green)">53</div>
+        <div class="source-origin">Atendidos em até 48h úteis, com exceção de força maior (ver regra abaixo)</div>
+      </div>
+    </div>
+    <div class="info-box">
+      💡 <strong>Regra acertada com você:</strong> ocorrências que ultrapassam o prazo de 48h são contadas como
+      atraso normalmente — <strong>exceto</strong> quando status = <code>Impossibilidade</code> e motivo = <code>Chuva</code>
+      (força maior climática). Nesses casos o prazo é recalculado e <strong>não onera o indicador</strong>
+      (conta como atendido dentro do prazo).<br><br>
+      📊 <strong>Validação histórica (jan–mai/26):</strong> encontrei essa combinação exata em <strong>fevereiro/26</strong> —
+      3 ocorrências que estavam atrasadas (4h15, 4h14 e 1h50 de atraso) foram reclassificadas como dentro do prazo
+      por causa da chuva, levando o PCNE de fevereiro de 95,8% para <strong>100%</strong>.
+    </div>
+    <div class="result-row">
+      <div class="result-label">Maio/26: 53/53 dentro do prazo (nenhum atraso no mês) → PCNE = 100,00%</div>
+      <div class="result-val" style="color:var(--green)">100%</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SLA 4 ═══════════════ -->
+  <div class="sec">SLA 4 — Tempo de Operação do Sistema (TOS)</div>
+  <div class="card" style="border-top:3px solid var(--green)">
+    <div class="sla-head">
+      <div class="sla-title">SLA 4 — TOS</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sla-peso">Peso 10%</span>
+        <span class="status-pill status-ok">✓ Resolvido</span>
+      </div>
+    </div>
+    <div class="formula-box">TOS (%) = (1440 × Dm − Ti) / (1440 × Dm)</div>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="source-label">Dm — Dias no mês</div>
+        <div class="source-val" style="color:var(--teal)">31</div>
+        <div class="source-origin">Calculado automaticamente (maio tem 31 dias)</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Ti — Inoperabilidade do sistema (min)</div>
+        <div class="source-val" style="color:var(--green)">0</div>
+        <div class="source-origin">Confirmado pelo <strong>"Indicador de Disponibilidade do Sistema"</strong> da própria plataforma Smartgreen/SGIP: 100% em maio/26</div>
+      </div>
+    </div>
+    <div class="info-box">
+      💡 <strong>Fonte oficial:</strong> a plataforma Smartgreen/SGIP já calcula esse percentual de disponibilidade
+      diretamente. Como o indicador da plataforma mostrou 100%, Ti = 0 minutos — não é mais uma suposição.
+    </div>
+    <div class="result-row">
+      <div class="result-label">TOS = (1440×31 − 0) / (1440×31) = 100,00% → faixa ≥99,01%</div>
+      <div class="result-val" style="color:var(--green)">100%</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SLA 5 ═══════════════ -->
+  <div class="sec">SLA 5 — Satisfação dos Usuários</div>
+  <div class="card" style="border-top:3px solid var(--green)">
+    <div class="sla-head">
+      <div class="sla-title">SLA 5 — Pesquisa</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sla-peso">Peso 10%</span>
+        <span class="status-pill status-ok">✓ Resolvido</span>
+      </div>
+    </div>
+    <div class="formula-box">SLA5 (%) = pBom + pÓtimo &nbsp;&nbsp;|&nbsp;&nbsp; Atendido (1,0) se classificação ≥ "Bom" (≥70%)</div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:12px">
+      📥 Extraído da planilha <code>Sub_relatório_pesquisa_de_satisfação_Içara-Maio_2026.xlsx</code>,
+      coluna <strong>"Avaliaçao Serviço de Iluminação Pública"</strong>
+    </div>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="source-label">Total de Ligações</div>
+        <div class="source-val" style="color:var(--teal)">33</div>
+        <div class="source-origin">Todas as respostas da pesquisa em maio/26</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Não Opinou</div>
+        <div class="source-val" style="color:var(--gray)">10</div>
+        <div class="source-origin">Excluído da base de cálculo (%) — restam 23 respostas válidas</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Ótimo / Bom</div>
+        <div class="source-val" style="color:var(--green)">13 / 8</div>
+        <div class="source-origin">56,52% Ótimo + 34,78% Bom = <strong>91,30%</strong> avaliação positiva</div>
+      </div>
+      <div class="source-item">
+        <div class="source-label">Regular / Ruim</div>
+        <div class="source-val" style="color:var(--amber)">2 / 0</div>
+        <div class="source-origin">8,70% Regular + 0% Ruim</div>
+      </div>
+    </div>
+    <div class="result-row">
+      <div class="result-label">91,30% ≥ 90% → classificação <strong>"Ótimo"</strong> → atendido (Bom ou Ótimo)</div>
+      <div class="result-val" style="color:var(--green)">100%</div>
+    </div>
+    <div class="info-box">
+      ⚠ <strong>Atenção — discrepância encontrada:</strong> o <code>dashboard_sla.html</code> atual usa uma escala
+      graduada (100%/90%/0%) para este SLA, mas o contrato define regra <strong>binária</strong>: atendido (1,0) se
+      a avaliação classificar como Bom ou Ótimo (≥70%), não atendido (0) caso contrário. Vou ajustar isso também.
+    </div>
+  </div>
+
+  <!-- ═══════════════ IE FINAL ═══════════════ -->
+  <div class="sec">Índice de Eficiência (IE) — Resultado Combinado</div>
+  <div class="ie-final">
+    <div style="font-size:.74rem;color:#a0b4c8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">
+      IE = (SLA1×0,4) + (SLA2×0,2) + (SLA3×0,2) + (SLA4×0,1) + (SLA5×0,1)
+    </div>
+    <div class="num">1,00<span style="font-size:1.3rem;color:#a0b4c8"> / 1,00</span></div>
+    <div style="font-size:.78rem;color:#4ade80;margin-top:6px;font-weight:700">✓ Completo — todos os 5 SLAs calculados · Maio/26 foi perfeito</div>
+    <div class="ie-breakdown">
+      <div class="ie-piece"><div class="val" style="color:#4ade80">1,00 × 0,4</div><div class="lbl">SLA 1 ✓</div></div>
+      <div class="ie-piece"><div class="val" style="color:#4ade80">1,00 × 0,2</div><div class="lbl">SLA 2 ✓</div></div>
+      <div class="ie-piece"><div class="val" style="color:#4ade80">1,00 × 0,2</div><div class="lbl">SLA 3 ✓</div></div>
+      <div class="ie-piece"><div class="val" style="color:#4ade80">1,00 × 0,1</div><div class="lbl">SLA 4 ✓</div></div>
+      <div class="ie-piece"><div class="val" style="color:#4ade80">1,00 × 0,1</div><div class="lbl">SLA 5 ✓</div></div>
+    </div>
+    <div style="font-size:.72rem;color:#4ade80;margin-top:14px">✓ Todos os 5 SLAs confirmados com dados oficiais — nenhuma suposição restante</div>
+  </div>
+
+  <!-- ═══════════════ PERGUNTAS ═══════════════ -->
+  <div class="sec">Para Avançar, Preciso que Você Confirme</div>
+  <div class="card" style="border-left:4px solid var(--purple)">
+    <ul class="questions-list">
+      <li><span class="q-num">1</span> <div><strong>Regra do SLA 5</strong> — único item pendente. Confirma que devo trocar a escala graduada do <code>dashboard_sla.html</code> pela regra binária do contrato (atendido se ≥70%, não atendido se &lt;70%)?</div></li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
