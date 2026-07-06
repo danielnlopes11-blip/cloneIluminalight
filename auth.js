@@ -26,7 +26,7 @@ function mostrarTelaLogin(msgErro = '') {
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2535,#2d4a7a);font-family:'Barlow',sans-serif">
       <div style="background:white;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:700;color:#1a2535;letter-spacing:.3px;margin-bottom:4px">
-          ILUMINA<em>BOARD</em>
+          INDICA<em style="font-style:normal;color:#008fa8">.AI</em>
         </div>
         <p style="font-size:.85rem;color:#5a6e82;margin-bottom:28px">Acesse com seu email e senha.</p>
         <input id="li-email" type="email" placeholder="email" autocomplete="email"
