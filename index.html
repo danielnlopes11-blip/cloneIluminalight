@@ -15,6 +15,8 @@ h1{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;colo
 h1 em{font-style:normal;color:#008fa8}
 .sub{color:#5a6e82;font-size:.9rem;text-align:center;margin-bottom:52px}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;width:100%}
+.card.pub::before{background:linear-gradient(90deg,#7b35b8,#1a52b0)}
+.card.apr::before{background:linear-gradient(90deg,#1a8a3c,#008fa8)}
 @media(max-width:640px){.cards{grid-template-columns:1fr}}
 .card{background:#fff;border:1px solid #d1dae6;border-radius:16px;padding:32px;text-decoration:none;color:inherit;transition:all .3s;position:relative;overflow:hidden;display:block;box-shadow:0 2px 12px rgba(0,0,0,.07)}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
@@ -62,6 +64,26 @@ h1 em{font-style:normal;color:#008fa8}
       <span class="tag t5">Manutenções</span>
       <span class="tag t2">Prazos</span>
       <span class="tag t1">Materiais</span>
+    </div>
+    <div class="arrow">Acessar →</div>
+  </a>
+  <a href="publicar_dados.html" class="card pub">
+    <span class="icon">☁️</span>
+    <div class="title">Publicar Dados</div>
+    <div class="desc">Importe planilhas mensais de ocorrências, materiais e prazos. Os dados são salvos diretamente no banco e ficam disponíveis nos painéis instantaneamente.</div>
+    <div class="tags">
+      <span class="tag t3">Upload</span>
+      <span class="tag t1">Supabase</span>
+    </div>
+    <div class="arrow">Acessar →</div>
+  </a>
+  <a href="gerar_apresentacao.html" class="card apr">
+    <span class="icon">📊</span>
+    <div class="title">Gerar Apresentação</div>
+    <div class="desc">Crie uma apresentação pública somente-leitura com os principais indicadores do mês, pronta para compartilhar com stakeholders.</div>
+    <div class="tags">
+      <span class="tag t3">PDF</span>
+      <span class="tag t2">Compartilhável</span>
     </div>
     <div class="arrow">Acessar →</div>
   </a>

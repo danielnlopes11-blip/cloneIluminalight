@@ -15,6 +15,8 @@ const PAINEL_ATUAL = (() => {
   const path = window.location.pathname.toLowerCase()
   if (path.includes('dashboard_sla'))         return 'sla'
   if (path.includes('dashboard_operacional')) return 'operacional'
+  if (path.includes('publicar_dados'))        return 'menu'
+  if (path.includes('gerar_apresentacao'))    return 'menu'
   if (path.includes('index'))                 return 'menu'
   return 'menu'
 })()
