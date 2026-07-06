@@ -144,4 +144,21 @@ async function verificarAcesso() {
 }
 
 // ── Inicia verificação ──
+
+// ── Descobre o tenant_id do usuario logado (multi-tenant) ──
+let _cachedTenantId = null;
+window.getTenantId = async function() {
+  if(_cachedTenantId) return _cachedTenantId;
+  const { data: { session } } = await db.auth.getSession();
+  if(!session) return null;
+  const { data } = await db
+    .from('painel_permissoes')
+    .select('tenant_id')
+    .eq('user_id', session.user.id)
+    .eq('ativo', true)
+    .limit(1)
+    .maybeSingle();
+  _cachedTenantId = data ? data.tenant_id : null;
+  return _cachedTenantId;
+}
 verificarAcesso()
