@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Operacional · Iluminação Pública 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -2386,7 +2387,47 @@ function voltarDash(){
   applyData(DB_OP[CUR_MES]||DB_OP[Object.keys(DB_OP)[0]]);
 }
 
-function loadJson(){
+// ── Supabase ──
+const _sbc = (typeof supabase !== 'undefined') ? supabase.createClient(
+  'https://rxaxmurvqnccecxpjkhi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko'
+) : null;
+const _TENANT_ID = '652de80d-3d09-4db8-b32b-229394abc976';
+
+async function loadJson(){
+  try{
+    // Tenta carregar do Supabase primeiro
+    if(_sbc){
+      const { data, error } = await _sbc
+        .from('dados_mensais')
+        .select('mes, dados, atualizado_em')
+        .eq('tenant_id', _TENANT_ID)
+        .not('mes', 'like', '%_sla');
+
+      if(!error && data && data.length){
+        data.forEach(row => {
+          const d = row.dados;
+          d.mes = row.mes;
+          DB_OP[row.mes] = d;
+        });
+        const keys = Object.keys(DB_OP);
+        const lastMes = ALL_MESES.filter(m=>DB_OP[m]).pop() || keys[keys.length-1];
+        CUR_MES = lastMes;
+        document.getElementById('loading-op').style.display='none';
+        document.getElementById('upload-screen').style.display='none';
+        document.getElementById('dash-wrapper').style.display='block';
+        const upd = document.getElementById('tb-upd');
+        if(upd) upd.textContent = '✓ ' + keys.length + ' mês(es) carregados do banco';
+        const bv = document.getElementById('btn-voltar');
+        if(bv) bv.style.display='inline-block';
+        applyData(DB_OP[lastMes]);
+        renderMesesBar();
+        return;
+      }
+    }
+  }catch(e){ console.warn('Supabase indisponivel, tentando JSON local:', e); }
+
+  // Fallback: JSON local
   fetch('dados_operacional.json?v='+Date.now())
     .then(r=>r.ok?r.json():Promise.reject())
     .then(j=>{
@@ -2404,7 +2445,6 @@ function loadJson(){
       const bv=document.getElementById('btn-voltar');
       if(bv) bv.style.display='inline-block';
       applyData(DB_OP[lastMes]);
-      // Garante que a barra de meses está atualizada com o mês ativo correto
       renderMesesBar();
     })
     .catch(()=>{
