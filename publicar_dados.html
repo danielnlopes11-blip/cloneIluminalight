@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Publicar Dados · IluminaBoard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -228,6 +229,9 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
 </div>
 
 <script>
+const { createClient } = supabase
+const db = createClient('https://rxaxmurvqnccecxpjkhi.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko')
+const TENANT_ID = '652de80d-3d09-4db8-b32b-229394abc976'
 const REPO_OWNER = 'operacionalDaniel';
 const REPO_NAME  = 'MetricasIluminaLigth';
 const BRANCH = 'main';
@@ -885,63 +889,45 @@ function nowStr(){
 }
 
 async function publicarGitHub(){
-  const token = document.getElementById('gh-token').value.trim();
-  if(!token){ alert('Informe o token do GitHub no Passo 1.'); return; }
   if(!PREVIEW_DATA){ alert('Clique em "Pré-visualizar Dados" antes de publicar.'); return; }
-
-  if(document.getElementById('remember-token').checked){
-    localStorage.setItem('iluminaboard_gh_token', token);
-  } else {
-    localStorage.removeItem('iluminaboard_gh_token');
-  }
-
   const btn = document.getElementById('btn-publish');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Publicando…';
-
   const { mes, d, anexo } = PREVIEW_DATA;
-
   try{
-    // ── 1. dados_operacional.json ──
-    log('Buscando dados_operacional.json atual no repositório…');
-    const opFile = await ghGetFile(token, 'dados_operacional.json');
+    log('Salvando dados operacionais no Supabase…');
     const novoMes = Object.assign({}, d, { mes });
     delete novoMes.mesDetectado;
-    opFile.data.meses[mes] = novoMes;
-    opFile.data.ultima_atualizacao = nowStr();
-    log('Publicando dados_operacional.json…');
-    await ghPutFile(token, 'dados_operacional.json', opFile.sha, opFile.data,
-      'data: atualiza '+mes+' via publicar_dados.html — '+d.total_os+' OS');
-    log('dados_operacional.json publicado com sucesso.', 'ok');
-
-    // ── 2. dados.json (apenas se ANEXO_1 foi enviado) ──
+    const { error: errOp } = await db.from('dados_mensais').upsert({
+      tenant_id: TENANT_ID, mes: mes,
+      dados: { tipo: 'operacional', ...novoMes },
+      atualizado_em: new Date().toISOString()
+    }, { onConflict: 'tenant_id,mes' });
+    if(errOp) throw new Error('Erro operacional: ' + errOp.message);
+    log('Dados operacionais salvos.', 'ok');
     if(anexo){
-      log('Buscando dados.json (SLAs) atual no repositório…');
-      const slaFile = await ghGetFile(token, 'dados.json');
-      slaFile.data.meses[mes] = Object.assign({mes: mes}, anexo.dadosSla);
-      slaFile.data.ultima_atualizacao = mes;
-      log('Publicando dados.json…');
-      await ghPutFile(token, 'dados.json', slaFile.sha, slaFile.data,
-        'data: atualiza SLAs de '+mes+' via publicar_dados.html');
-      log('dados.json publicado com sucesso.', 'ok');
+      log('Salvando SLAs no Supabase…');
+      const { error: errSla } = await db.from('dados_mensais').upsert({
+        tenant_id: TENANT_ID, mes: mes + '_sla',
+        dados: { tipo: 'sla', mes: mes, ...anexo.dadosSla },
+        atualizado_em: new Date().toISOString()
+      }, { onConflict: 'tenant_id,mes' });
+      if(errSla) throw new Error('Erro SLA: ' + errSla.message);
+      log('SLAs salvos.', 'ok');
     } else {
-      log('ANEXO_1 não enviado — dados.json (SLAs) não foi alterado.', 'warn');
+      log('ANEXO_1 nao enviado — SLAs nao alterados.', 'warn');
     }
-
-    log('🎉 Publicação concluída! As alterações aparecerão no GitHub Pages em até 2 minutos.', 'ok');
-    document.getElementById('preview-extra').innerHTML += 
-      '<div class="info-box info-green" style="margin-top:10px">✅ Publicado! Acesse: '+
-      '<a href="dashboard_operacional.html" target="_blank">dashboard_operacional.html</a>'+
-      (anexo?' · <a href="dashboard_sla.html" target="_blank">dashboard_sla.html</a>':'')+'</div>';
-
+    log('Publicacao concluida! Dados disponiveis imediatamente.', 'ok');
+    document.getElementById('preview-extra').innerHTML += '<div class="info-box info-green" style="margin-top:10px">Publicado no Supabase com sucesso!</div>';
   }catch(e){
-    log('✗ '+e.message, 'err');
-    alert('Erro ao publicar: '+e.message);
+    log('Erro: ' + e.message, 'err');
+    alert('Erro ao publicar: ' + e.message);
   }finally{
     btn.disabled = false;
-    btn.innerHTML = '☁️ Publicar no GitHub';
+    btn.innerHTML = 'Publicar no Supabase';
   }
 }
+// FIM_SUBSTITUICAO
 </script>
 </body>
 </html>
