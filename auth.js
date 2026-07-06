@@ -21,6 +21,7 @@ const PAINEL_ATUAL = (() => {
 
 // ── Tela de login ──
 function mostrarTelaLogin(msgErro = '') {
+  document.body.setAttribute('style', 'margin:0;padding:0;min-height:100vh;width:100vw;display:block;background:#1a2535;overflow:hidden');
   document.body.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2535,#2d4a7a);font-family:'Barlow',sans-serif">
       <div style="background:white;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
