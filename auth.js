@@ -106,7 +106,7 @@ window._authLogin = async function() {
 // ── Logout ──
 window._authLogout = async function() {
   await db.auth.signOut()
-  location.href = '/MetricasIluminaLigth/'
+  location.reload()
 }
 
 // ── Verificação principal ──
