@@ -123,9 +123,8 @@ window._authLogin = async function () {
 }
 
 // ── Logout ──
-window._authLogout = async function () {
-  await db.auth.signOut()
-  window.location.href = '/index.html'
+await db.auth.signOut()
+location.reload()
 }
 
 // ── Verificação principal ──
