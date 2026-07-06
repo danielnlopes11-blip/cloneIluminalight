@@ -123,8 +123,10 @@ window._authLogin = async function () {
 }
 
 // ── Logout ──
-await db.auth.signOut()
-location.reload()
+window._authLogout = async function () {
+  await db.auth.signOut()
+  location.reload()
+}
 }
 
 // ── Verificação principal ──
