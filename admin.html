@@ -200,54 +200,13 @@ tr:hover td{background:#fafbfc}
 </div>
 
 <script>
-const SUPABASE_URL = 'https://rxaxmurvqnccecxpjkhi.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let TENANTS_CACHE = [];
-
-window.addEventListener('load', async function(){
-  await verificarAdmin();
+window.addEventListener('authReady', async function(){
   await carregarTenants();
   await carregarPermissoes();
   sincronizarCoresPicker();
 });
-
-// ── Verifica se o usuário logado é admin global ──
-async function verificarAdmin(){
-  const { data: { session } } = await db.auth.getSession();
-  if(!session){
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1a2535;color:#fff;font-family:'Barlow',sans-serif;text-align:center">
-        <div>
-          <div style="font-size:1.4rem;font-weight:700;margin-bottom:10px">Acesso restrito</div>
-          <div style="color:#a0b4c8;font-size:.9rem">Faça login para acessar o painel de administração.</div>
-          <a href="index.html" style="display:inline-block;margin-top:20px;color:#00d4c8">Voltar ao login →</a>
-        </div>
-      </div>`;
-    throw new Error('sem sessao');
-  }
-
-  const { data: admin } = await db
-    .from('admins_globais')
-    .select('id')
-    .eq('user_id', session.user.id)
-    .maybeSingle();
-
-  if(!admin){
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f6f9;font-family:'Barlow',sans-serif;text-align:center">
-        <div>
-          <div style="font-size:2.5rem;margin-bottom:16px">🔒</div>
-          <div style="font-size:1.2rem;font-weight:700;color:#1a2535;margin-bottom:8px">Acesso não autorizado</div>
-          <div style="color:#5a6e82;font-size:.9rem">Você não tem permissão de administrador.</div>
-          <a href="index.html" style="display:inline-block;margin-top:20px;color:#008fa8">Voltar ao início →</a>
-        </div>
-      </div>`;
-    throw new Error('nao e admin');
-  }
-}
 
 // ── Sincroniza color picker com input de texto ──
 function sincronizarCoresPicker(){
@@ -435,5 +394,6 @@ async function carregarPermissoes(){
   `).join('');
 }
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

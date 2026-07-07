@@ -17,6 +17,7 @@ const PAINEL_ATUAL = (() => {
   if (path.includes('dashboard_operacional')) return 'operacional'
   if (path.includes('publicar_dados'))        return 'menu'
   if (path.includes('gerar_apresentacao'))    return 'menu'
+  if (path.includes('admin'))                 return 'admin'
   if (path.includes('index'))                 return 'menu'
   return 'menu'
 })()
@@ -121,13 +122,31 @@ async function verificarAcesso() {
     return
   }
 
+
   // Se é o menu principal, só precisa estar logado
   if (PAINEL_ATUAL === 'menu') {
     injetarBotaoLogout(session.user.email)
+    window.dispatchEvent(new Event('authReady'))
     return
   }
 
-  // Verifica permissão específica do painel
+  // Painel de administracao - checa admins_globais
+  if (PAINEL_ATUAL === 'admin') {
+    const { data: admin } = await db
+      .from('admins_globais')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+    if (!admin) {
+      mostrarAcessoNegado()
+      return
+    }
+    injetarBotaoLogout(session.user.email)
+    window.dispatchEvent(new Event('authReady'))
+    return
+  }
+
+  // Verifica permissao especifica do painel
   const { data: permissao } = await db
     .from('painel_permissoes')
     .select('ativo')
@@ -141,6 +160,7 @@ async function verificarAcesso() {
   }
 
   injetarBotaoLogout(session.user.email)
+  window.dispatchEvent(new Event('authReady'))
 }
 
 // ── Inicia verificação ──
