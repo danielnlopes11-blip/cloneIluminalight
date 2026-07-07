@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Publicar Dados · IluminaBoard</title>
+<title>Publicar Dados · Indica.AI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -106,7 +106,7 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
     <div class="h-brand">PUBLICAR <em>DADOS</em></div>
     <div class="h-sub">Envie os dados mensais direto para o GitHub · sem precisar do chat</div>
   </div>
-  <a class="hbtn" href="index_menu.html">🏠 Menu</a>
+  <a class="hbtn" href="index.html">🏠 Menu</a>
 </div>
 
 <div class="wrap">
@@ -210,10 +210,6 @@ input[type=password]:focus,input[type=text]:focus,select:focus{outline:none;bord
 </div>
 
 <script>
-
-const REPO_OWNER = 'operacionalDaniel';
-const REPO_NAME  = 'MetricasIluminaLigth';
-const BRANCH = 'main';
 const DIAS_MES = {jan:31,fev:28,mar:31,abr:30,mai:31,jun:30,jul:31,ago:31,set:30,out:31,nov:30,dez:31};
 
 const FILES = {oc:null, mat:null, prazos:null, anexo:null, cadastro:null};
@@ -817,30 +813,6 @@ function log(msg, type){
 // ══════════════════════════════════════════════
 //  GITHUB API
 // ══════════════════════════════════════════════
-async function ghGetFile(token, path){
-  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
-    headers: { 'Authorization': 'token '+token }
-  });
-  if(!res.ok) throw new Error('Falha ao buscar '+path+' (HTTP '+res.status+')');
-  const json = await res.json();
-  const content = decodeURIComponent(escape(atob(json.content.replace(/\n/g,''))));
-  return { sha: json.sha, data: JSON.parse(content) };
-}
-
-async function ghPutFile(token, path, sha, dataObj, message){
-  const jsonStr = JSON.stringify(dataObj, null, 2);
-  const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-    method: 'PUT',
-    headers: { 'Authorization': 'token '+token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, content: b64, sha, branch: BRANCH })
-  });
-  if(!res.ok){
-    const errBody = await res.json().catch(()=>({}));
-    throw new Error('Falha ao publicar '+path+' (HTTP '+res.status+'): '+(errBody.message||''));
-  }
-  return await res.json();
-}
 
 function nowStr(){
   const d = new Date();

@@ -213,7 +213,7 @@ canvas{display:block;width:100%;max-height:220px}
 .info-amber{background:#fdf8f0;border:1px solid rgba(196,121,0,.25)}
 .info-blue{background:#f0f4fd;border:1px solid rgba(26,82,176,.2)}
 .info-red{background:rgba(212,43,43,.04);border:1px solid rgba(212,43,43,.2)}
-/* ── Widget do IluminaBoard Copilot ── */
+/* ── Widget do Indica.AI Copilot ── */
 #copilot-fab{position:fixed;bottom:22px;right:22px;width:56px;height:56px;border-radius:50%;
   background:linear-gradient(135deg,var(--teal),var(--cyan));border:none;color:#fff;font-size:1.5rem;
   cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -2519,7 +2519,7 @@ window.addEventListener('load',function(){
 window.addEventListener('resize',()=>{ if(CUR_DATA) drawAll(CUR_DATA); });
 
 // ══════════════════════════════════════════════
-//  IluminaBoard Copilot — widget de chat
+//  Indica.AI Copilot — widget de chat
 //  ⚠️ EDITE A LINHA ABAIXO depois de publicar o backend no Render:
 // ══════════════════════════════════════════════
 const COPILOT_API_URL = 'https://copilotrender.onrender.com'; // backend publicado no Render
@@ -2532,7 +2532,7 @@ function copilotToggle(){
   const panel = document.getElementById('copilot-panel');
   panel.classList.toggle('open', copilotAberto);
   if(copilotAberto && document.getElementById('copilot-msgs').children.length === 0){
-    copilotAddMsg('Olá! Pergunte sobre o SLA ou os dados operacionais do IluminaBoard (ex: "Qual foi o CME de abril?" ou "Quantas OS de tele gestão tivemos em maio?").', 'bot');
+    copilotAddMsg('Olá! Pergunte sobre o SLA ou os dados operacionais do Indica.AI (ex: "Qual foi o CME de abril?" ou "Quantas OS de tele gestão tivemos em maio?").', 'bot');
   }
   if(copilotAberto) document.getElementById('copilot-input').focus();
 }
@@ -2606,11 +2606,11 @@ async function copilotEnviar(ev){
   }
 }
 </script>
-<!-- ── Widget do IluminaBoard Copilot ── -->
+<!-- ── Widget do Indica.AI Copilot ── -->
 <button id="copilot-fab" onclick="copilotToggle()" title="Perguntar ao Copilot">💬</button>
 <div id="copilot-panel">
   <div id="copilot-head">
-    <span>🤖 IluminaBoard Copilot</span>
+    <span>🤖 Indica.AI Copilot</span>
     <button id="copilot-close" onclick="copilotToggle()">✕</button>
   </div>
   <div id="copilot-msgs"></div>
