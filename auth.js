@@ -159,6 +159,7 @@ async function verificarAcesso() {
     return
   }
 
+  await aplicarTemaTenant()
   injetarBotaoLogout(session.user.email)
   window.dispatchEvent(new Event('authReady'))
 }
@@ -180,5 +181,33 @@ window.getTenantId = async function() {
     .maybeSingle();
   _cachedTenantId = data ? data.tenant_id : null;
   return _cachedTenantId;
+}
+
+// Aplica cores do tenant como sobreposicao de CSS
+async function aplicarTemaTenant() {
+  const tenantId = await window.getTenantId()
+  if (!tenantId) return
+  const { data: tenant } = await db
+    .from('tenants')
+    .select('cor_primaria, cor_secundaria, nome')
+    .eq('id', tenantId)
+    .maybeSingle()
+  if (!tenant) return
+  const cp = tenant.cor_primaria || '#1a2a40'
+  const cs = tenant.cor_secundaria || '#00d4c8'
+  const style = document.createElement('style')
+  style.id = 'tenant-theme-override'
+  style.textContent = '.header{background:linear-gradient(135deg,' + cp + ' 0%,' + cp + ' 100%) !important}' +
+    '.h-brand em{color:' + cs + ' !important}' +
+    '.badge-teal{background:' + cs + '22 !important;border-color:' + cs + '66 !important;color:' + cp + ' !important}' +
+    '.mes-tab.mes-active{background:' + cs + ' !important;border-color:' + cs + ' !important}' +
+    '.tab.active{color:' + cs + ' !important;border-bottom-color:' + cs + ' !important}' +
+    '.card::before{background:' + cs + ' !important}'
+  document.head.appendChild(style)
+  const brandEl = document.querySelector('.h-brand')
+  if (brandEl && tenant.nome) {
+    const em = brandEl.querySelector('em')
+    if (em) em.textContent = tenant.nome.toUpperCase()
+  }
 }
 verificarAcesso()
