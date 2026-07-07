@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin · Indica.AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#e8edf3;--card:#ffffff;
+  --border:#d1dae6;--border2:#b8c5d3;
+  --navy:#1a2535;--teal:#008fa8;--amber:#c47900;--red:#d42b2b;--green:#1a8a3c;--blue:#1a52b0;--purple:#7b35b8;
+  --text:#1a2535;--muted:#5a6e82;
+  --shadow:0 1px 4px rgba(0,0,0,.10),0 2px 12px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+.header{background:linear-gradient(135deg,#1a2a40 0%,#1e3554 100%);
+  border-bottom:2px solid #b8c5d3;padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.h-brand{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:.03em}
+.h-brand em{font-style:normal;color:#00d4c8}
+.h-sub{color:#a0b4c8;font-size:.72rem;margin-top:2px}
+.hbtn{padding:7px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;
+  color:rgba(255,255,255,.85);font-size:.74rem;cursor:pointer;text-decoration:none;display:inline-block}
+.hbtn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6)}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}
+.section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.section-desc{font-size:.8rem;color:var(--muted);margin-bottom:18px}
+label.field-label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+input[type=text],input[type=email],input[type=color],select{
+  width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;font-size:.88rem;
+  font-family:'Barlow',sans-serif;background:#fff;color:var(--text)}
+input:focus,select:focus{outline:none;border-color:var(--teal)}
+.field-row{margin-bottom:14px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:640px){.field-grid,.field-grid-3{grid-template-columns:1fr}}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:50px;height:38px;padding:2px;cursor:pointer}
+.btn-primary{padding:11px 24px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal),#0077a0);color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:.92rem;font-weight:800;letter-spacing:.03em;transition:all .2s}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-secondary{padding:9px 18px;border-radius:8px;border:1px solid var(--border2);background:#fff;color:var(--text);
+  font-size:.82rem;cursor:pointer;font-family:'Barlow',sans-serif}
+.btn-secondary:hover{border-color:var(--teal);color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;padding:10px 12px;background:var(--surface);color:var(--muted);font-size:.68rem;
+  text-transform:uppercase;letter-spacing:.05em;font-weight:700;border-bottom:2px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:#fafbfc}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:700}
+.badge-teal{background:rgba(0,143,168,.1);color:#006d82}
+.badge-purple{background:rgba(123,53,184,.1);color:#5b2894}
+.badge-amber{background:rgba(196,121,0,.1);color:#8a5600}
+.color-dot{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.1)}
+.info-box{padding:12px 16px;border-radius:8px;font-size:.78rem;margin-bottom:14px;line-height:1.6}
+.info-teal{background:#f0f9fb;border:1px solid rgba(0,143,168,.2);color:#0d4a56}
+.info-green{background:rgba(26,138,60,.05);border:1px solid rgba(26,138,60,.2);color:#0f5c26}
+.info-red{background:rgba(212,43,43,.05);border:1px solid rgba(212,43,43,.2);color:#8a1f1f}
+.info-amber{background:#fdf8f0;border:1px solid rgba(196,121,0,.25);color:#6b4500}
+.log-area{background:#1a2535;border-radius:10px;padding:14px 16px;margin-top:14px;font-family:monospace;
+  font-size:.76rem;color:#a0d8c8;max-height:200px;overflow-y:auto;display:none;line-height:1.7}
+.log-line{margin-bottom:3px}
+.log-ok{color:#4ade80}
+.log-err{color:#f87171}
+.log-warn{color:#fbbf24}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:.85rem}
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.checkbox-item{display:flex;align-items:center;gap:8px;font-size:.82rem;padding:8px 10px;
+  border:1px solid var(--border2);border-radius:6px;cursor:pointer}
+.checkbox-item:has(input:checked){border-color:var(--teal);background:rgba(0,143,168,.05)}
+.tenant-select-wrap{margin-bottom:14px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="h-brand">ADMIN <em>INDICA.AI</em></div>
+    <div class="h-sub">Painel de administração — gerencie clientes, permissões e planos</div>
+  </div>
+  <a class="hbtn" href="index.html">🏠 Sair do Admin</a>
+</div>
+<div class="wrap">
+
+  <!-- LISTA DE TENANTS -->
+  <div class="section">
+    <div class="section-title">🏢 Clientes Cadastrados</div>
+    <div class="section-desc">Todos os tenants ativos no sistema.</div>
+    <div id="tenants-loading" class="info-box info-teal">Carregando clientes…</div>
+    <div id="tenants-table-wrap" style="display:none;overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>Cores</th><th>Plano</th><th>Status</th><th>Criado em</th></tr>
+        </thead>
+        <tbody id="tenants-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CADASTRAR NOVO TENANT -->
+  <div class="section">
+    <div class="section-title">➕ Cadastrar Novo Cliente</div>
+    <div class="section-desc">Cria o registro do tenant com identidade visual e plano.</div>
+
+    <div class="field-grid">
+      <div class="field-row">
+        <label class="field-label">Nome do Cliente / Empresa</label>
+        <input type="text" id="novo-nome" placeholder="ex: Tudo Novo Engenharia"/>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Email de Contato</label>
+        <input type="email" id="novo-email" placeholder="contato@empresa.com.br"/>
+      </div>
+    </div>
+
+    <div class="field-grid-3">
+      <div class="field-row">
+        <label class="field-label">Cor Primária</label>
+        <div class="color-row">
+          <input type="color" id="novo-cor-primaria" value="#1B2A4A"/>
+          <input type="text" id="novo-cor-primaria-hex" value="#1B2A4A" style="flex:1"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Cor Secundária</label>
+        <div class="color-row">
+          <input type="color" id="novo-cor-secundaria" value="#F59E0B"/>
+          <input type="text" id="novo-cor-secundaria-hex" value="#F59E0B" style="flex:1"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Plano</label>
+        <select id="novo-plano">
+          <option value="essencial">Essencial</option>
+          <option value="profissional" selected>Profissional</option>
+          <option value="painel_ia">Painel + IA</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="cadastrarTenant()" id="btn-cadastrar-tenant">Cadastrar Cliente</button>
+    <div class="log-area" id="log-tenant"></div>
+  </div>
+
+  <!-- VINCULAR PERMISSÃO -->
+  <div class="section">
+    <div class="section-title">🔑 Vincular Acesso de Usuário</div>
+    <div class="section-desc">
+      Antes de vincular, crie o usuário em <strong>Supabase → Authentication → Add user</strong>
+      com o email e senha do cliente. Depois cole o email aqui para liberar o acesso aos painéis.
+    </div>
+
+    <div class="info-box info-amber">
+      ⚠ A criação do login (email + senha) ainda precisa ser feita manualmente no Supabase por segurança.
+      Este formulário só vincula as permissões — não cria o usuário.
+    </div>
+
+    <div class="tenant-select-wrap">
+      <label class="field-label">Cliente (Tenant)</label>
+      <select id="vinc-tenant"></select>
+    </div>
+
+    <div class="field-row">
+      <label class="field-label">Email do Usuário (já criado no Supabase Auth)</label>
+      <input type="email" id="vinc-email" placeholder="usuario@empresa.com.br"/>
+    </div>
+
+    <div class="field-row">
+      <label class="field-label">Painéis Liberados</label>
+      <div class="checkbox-grid" id="paineis-checkboxes">
+        <label class="checkbox-item"><input type="checkbox" value="operacional" checked/> ⚙️ Métricas Operacionais</label>
+        <label class="checkbox-item"><input type="checkbox" value="sla" checked/> 📋 SLAs Contratuais</label>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="vincularPermissao()" id="btn-vincular">Vincular Acesso</button>
+    <div class="log-area" id="log-vinculo"></div>
+  </div>
+
+  <!-- USUÁRIOS E PERMISSÕES ATIVAS -->
+  <div class="section">
+    <div class="section-title">👥 Acessos Concedidos</div>
+    <div class="section-desc">Permissões ativas por cliente.</div>
+    <div id="permissoes-loading" class="info-box info-teal">Carregando permissões…</div>
+    <div id="permissoes-table-wrap" style="display:none;overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Cliente</th><th>Painel</th><th>Status</th></tr>
+        </thead>
+        <tbody id="permissoes-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://rxaxmurvqnccecxpjkhi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YXhtdXJ2cW5jY2VjeHBqa2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyODMyNjEsImV4cCI6MjA5ODg1OTI2MX0.y7ZDaQqb9P1fqNEZcMTn2YK363OS0T2bajXnJmXfoko';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let TENANTS_CACHE = [];
+
+window.addEventListener('load', async function(){
+  await verificarAdmin();
+  await carregarTenants();
+  await carregarPermissoes();
+  sincronizarCoresPicker();
+});
+
+// ── Verifica se o usuário logado é admin global ──
+async function verificarAdmin(){
+  const { data: { session } } = await db.auth.getSession();
+  if(!session){
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1a2535;color:#fff;font-family:'Barlow',sans-serif;text-align:center">
+        <div>
+          <div style="font-size:1.4rem;font-weight:700;margin-bottom:10px">Acesso restrito</div>
+          <div style="color:#a0b4c8;font-size:.9rem">Faça login para acessar o painel de administração.</div>
+          <a href="index.html" style="display:inline-block;margin-top:20px;color:#00d4c8">Voltar ao login →</a>
+        </div>
+      </div>`;
+    throw new Error('sem sessao');
+  }
+
+  const { data: admin } = await db
+    .from('admins_globais')
+    .select('id')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if(!admin){
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f6f9;font-family:'Barlow',sans-serif;text-align:center">
+        <div>
+          <div style="font-size:2.5rem;margin-bottom:16px">🔒</div>
+          <div style="font-size:1.2rem;font-weight:700;color:#1a2535;margin-bottom:8px">Acesso não autorizado</div>
+          <div style="color:#5a6e82;font-size:.9rem">Você não tem permissão de administrador.</div>
+          <a href="index.html" style="display:inline-block;margin-top:20px;color:#008fa8">Voltar ao início →</a>
+        </div>
+      </div>`;
+    throw new Error('nao e admin');
+  }
+}
+
+// ── Sincroniza color picker com input de texto ──
+function sincronizarCoresPicker(){
+  document.getElementById('novo-cor-primaria').addEventListener('input', e=>{
+    document.getElementById('novo-cor-primaria-hex').value = e.target.value;
+  });
+  document.getElementById('novo-cor-primaria-hex').addEventListener('input', e=>{
+    document.getElementById('novo-cor-primaria').value = e.target.value;
+  });
+  document.getElementById('novo-cor-secundaria').addEventListener('input', e=>{
+    document.getElementById('novo-cor-secundaria-hex').value = e.target.value;
+  });
+  document.getElementById('novo-cor-secundaria-hex').addEventListener('input', e=>{
+    document.getElementById('novo-cor-secundaria').value = e.target.value;
+  });
+}
+
+// ── Carrega lista de tenants ──
+async function carregarTenants(){
+  const { data, error } = await db.from('tenants').select('*').order('criado_em', {ascending:false});
+
+  if(error){
+    document.getElementById('tenants-loading').textContent = 'Erro ao carregar: ' + error.message;
+    return;
+  }
+
+  TENANTS_CACHE = data || [];
+  document.getElementById('tenants-loading').style.display = 'none';
+  document.getElementById('tenants-table-wrap').style.display = 'block';
+
+  const tbody = document.getElementById('tenants-tbody');
+  if(!TENANTS_CACHE.length){
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente cadastrado ainda.</td></tr>';
+  } else {
+    tbody.innerHTML = TENANTS_CACHE.map(t => `
+      <tr>
+        <td><strong>${t.nome}</strong><br><span style="color:#5a6e82;font-size:.75rem">${t.email||'—'}</span></td>
+        <td>
+          <span class="color-dot" style="background:${t.cor_primaria}"></span>${t.cor_primaria}<br>
+          <span class="color-dot" style="background:${t.cor_secundaria}"></span>${t.cor_secundaria}
+        </td>
+        <td><span class="badge ${t.plano==='painel_ia'?'badge-purple':t.plano==='profissional'?'badge-teal':'badge-amber'}">${t.plano}</span></td>
+        <td>${t.ativo ? '<span class="badge badge-teal">Ativo</span>' : '<span class="badge" style="background:#fee;color:#900">Inativo</span>'}</td>
+        <td style="font-size:.75rem;color:#5a6e82">${new Date(t.criado_em).toLocaleDateString('pt-BR')}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Popula o select de vinculação
+  const sel = document.getElementById('vinc-tenant');
+  sel.innerHTML = TENANTS_CACHE.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+}
+
+// ── Cadastra novo tenant ──
+function logTenant(msg, type){
+  const area = document.getElementById('log-tenant');
+  area.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'log-line'+(type==='ok'?' log-ok':type==='err'?' log-err':'');
+  line.textContent = (type==='ok'?'✓ ':type==='err'?'✗ ':'• ') + msg;
+  area.appendChild(line);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function cadastrarTenant(){
+  const nome = document.getElementById('novo-nome').value.trim();
+  const email = document.getElementById('novo-email').value.trim();
+  const corPrimaria = document.getElementById('novo-cor-primaria-hex').value.trim();
+  const corSecundaria = document.getElementById('novo-cor-secundaria-hex').value.trim();
+  const plano = document.getElementById('novo-plano').value;
+
+  if(!nome){ alert('Informe o nome do cliente.'); return; }
+
+  const btn = document.getElementById('btn-cadastrar-tenant');
+  btn.disabled = true;
+  btn.textContent = 'Cadastrando…';
+
+  try{
+    logTenant('Criando registro do tenant "'+nome+'"…');
+    const { data, error } = await db.from('tenants').insert({
+      nome, email: email || null,
+      cor_primaria: corPrimaria, cor_secundaria: corSecundaria,
+      plano, ativo: true
+    }).select().single();
+
+    if(error) throw new Error(error.message);
+
+    logTenant('Cliente "'+nome+'" cadastrado com sucesso!', 'ok');
+    logTenant('Próximo passo: crie o login em Supabase → Authentication → Add user, depois vincule o acesso abaixo.', 'ok');
+
+    document.getElementById('novo-nome').value = '';
+    document.getElementById('novo-email').value = '';
+
+    await carregarTenants();
+
+  }catch(e){
+    logTenant('Erro: ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Cadastrar Cliente';
+  }
+}
+
+// ── Vincula permissão de usuário a um tenant ──
+function logVinculo(msg, type){
+  const area = document.getElementById('log-vinculo');
+  area.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'log-line'+(type==='ok'?' log-ok':type==='err'?' log-err':'');
+  line.textContent = (type==='ok'?'✓ ':type==='err'?'✗ ':'• ') + msg;
+  area.appendChild(line);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function vincularPermissao(){
+  const tenantId = document.getElementById('vinc-tenant').value;
+  const email = document.getElementById('vinc-email').value.trim();
+  const paineis = Array.from(document.querySelectorAll('#paineis-checkboxes input:checked')).map(i=>i.value);
+
+  if(!tenantId){ alert('Cadastre um cliente antes de vincular acesso.'); return; }
+  if(!email){ alert('Informe o email do usuário.'); return; }
+  if(!paineis.length){ alert('Selecione ao menos um painel.'); return; }
+
+  const btn = document.getElementById('btn-vincular');
+  btn.disabled = true;
+  btn.textContent = 'Vinculando…';
+
+  try{
+    logVinculo('Buscando usuário pelo email "'+email+'"…');
+    const { data: userId, error: errFn } = await db.rpc('get_user_id_by_email', { email_input: email });
+
+    if(errFn) throw new Error('Erro ao buscar usuário: ' + errFn.message);
+    if(!userId) throw new Error('Usuário não encontrado. Crie o login primeiro em Supabase → Authentication → Add user.');
+
+    logVinculo('Usuário encontrado. Vinculando permissões…', 'ok');
+
+    for(const painel of paineis){
+      const { error } = await db.from('painel_permissoes').upsert({
+        user_id: userId,
+        tenant_id: tenantId,
+        painel: painel,
+        ativo: true
+      }, { onConflict: 'user_id,tenant_id,painel' });
+
+      if(error) throw new Error('Erro ao vincular painel "'+painel+'": ' + error.message);
+      logVinculo('Painel "'+painel+'" liberado.', 'ok');
+    }
+
+    logVinculo('🎉 Acesso vinculado com sucesso!', 'ok');
+    document.getElementById('vinc-email').value = '';
+
+    await carregarPermissoes();
+
+  }catch(e){
+    logVinculo('Erro: ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Vincular Acesso';
+  }
+}
+
+// ── Carrega permissões ativas ──
+async function carregarPermissoes(){
+  const { data, error } = await db
+    .from('painel_permissoes')
+    .select('painel, ativo, tenant_id, tenants(nome)')
+    .order('tenant_id');
+
+  document.getElementById('permissoes-loading').style.display = 'none';
+  document.getElementById('permissoes-table-wrap').style.display = 'block';
+
+  const tbody = document.getElementById('permissoes-tbody');
+
+  if(error || !data || !data.length){
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhuma permissão concedida ainda.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td>${p.tenants ? p.tenants.nome : '—'}</td>
+      <td><span class="badge badge-teal">${p.painel}</span></td>
+      <td>${p.ativo ? '<span class="badge badge-teal">Ativo</span>' : '<span class="badge" style="background:#fee;color:#900">Inativo</span>'}</td>
+    </tr>
+  `).join('');
+}
+</script>
+</body>
+</html>
