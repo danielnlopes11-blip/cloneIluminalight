@@ -583,6 +583,10 @@ window.addEventListener('resize',()=>{if(CUR)setTimeout(drawEv,50);});
 window.addEventListener('load',()=>{
   document.getElementById('ld').style.display='flex';
   document.getElementById('ldmsg').textContent='Carregando dados…';
+});
+
+// So carrega os dados depois que o auth.js confirmar login e permissao
+window.addEventListener('authReady', ()=>{
   fetch('dados.json?v='+Date.now())
     .then(r=>r.ok?r.json():Promise.reject())
     .then(j=>{

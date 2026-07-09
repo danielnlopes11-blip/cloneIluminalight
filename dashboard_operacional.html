@@ -2514,6 +2514,10 @@ window.addEventListener('load',function(){
   handleFileSlot('mat','fi-mat','mat');
   handleFileSlot('pr','fi-pr','pr');
   document.getElementById('loading-op').style.display='flex';
+});
+
+// Só carrega os dados depois que o auth.js confirmar login e permissao
+window.addEventListener('authReady', function(){
   loadJson();
 });
 window.addEventListener('resize',()=>{ if(CUR_DATA) drawAll(CUR_DATA); });
