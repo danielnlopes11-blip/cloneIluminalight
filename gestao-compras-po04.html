@@ -105,11 +105,11 @@ const CFG_KEY = 'gc_po04_config';
 function getConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); }catch(e){ return {}; } }
 function setConfig(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
 
-let supabase = null;
+let sb = null;
 let cfg = getConfig();
 function initClient(){
   if(cfg.url && cfg.anonKey){
-    supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
+    sb = window.supabase.createClient(cfg.url, cfg.anonKey);
   }
 }
 initClient();
@@ -178,7 +178,7 @@ document.getElementById('nav').addEventListener('click', e=>{
 
 async function route(){
   const main = document.getElementById('main');
-  if(!supabase){
+  if(!sb){
     main.innerHTML = `<div class="card empty">
       <div class="display">Configure a conexão primeiro</div>
       <p class="muted">Clique em <b>⚙ Config</b> no topo e informe a URL e a anon key do seu projeto Supabase, além do tenant_id.</p>
@@ -195,7 +195,7 @@ async function route(){
    HELPERS DE DADOS
    ============================================================ */
 async function gerarId(tipo){
-  const { data, error } = await supabase.rpc('gerar_proximo_id', { p_tenant_id: cfg.tenantId, p_tipo: tipo });
+  const { data, error } = await sb.rpc('gerar_proximo_id', { p_tenant_id: cfg.tenantId, p_tipo: tipo });
   if(error){ toast('Erro ao gerar ID: '+error.message, true); throw error; }
   return data;
 }
@@ -208,7 +208,7 @@ function fmtDate(d){ if(!d) return '—'; const [y,m,dd]=d.split('-'); return `$
 async function renderSolicitacoesList(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><p class="muted">Carregando…</p></div>`;
-  const { data: sos, error } = await supabase
+  const { data: sos, error } = await sb
     .from('solicitacoes_orcamento')
     .select('*')
     .eq('tenant_id', cfg.tenantId)
@@ -294,14 +294,14 @@ async function salvarSolicitacao(){
 
   try{
     const numero = await gerarId('SO');
-    const { data: so, error } = await supabase.from('solicitacoes_orcamento').insert({
+    const { data: so, error } = await sb.from('solicitacoes_orcamento').insert({
       tenant_id: cfg.tenantId, numero, data_solicitacao, solicitante, centro_custo,
       regime_urgente, observacoes, status:'aberta'
     }).select().single();
     if(error) throw error;
 
     const itensPayload = rows.map((r,i)=>({...r, solicitacao_id: so.id, ordem:i}));
-    const { error: e2 } = await supabase.from('solicitacao_itens').insert(itensPayload);
+    const { error: e2 } = await sb.from('solicitacao_itens').insert(itensPayload);
     if(e2) throw e2;
 
     closeModal();
@@ -320,15 +320,15 @@ async function renderSolicitacaoDetail(id){
   main.innerHTML = `<div class="card"><p class="muted">Carregando…</p></div>`;
 
   const [{data:so},{data:itens},{data:cotacoes},{data:fornecedores}] = await Promise.all([
-    supabase.from('solicitacoes_orcamento').select('*').eq('id',id).single(),
-    supabase.from('solicitacao_itens').select('*').eq('solicitacao_id',id).order('ordem'),
-    supabase.from('cotacoes').select('*, fornecedores(nome)').eq('solicitacao_id',id).order('created_at'),
-    supabase.from('fornecedores').select('*').eq('tenant_id',cfg.tenantId).eq('ativo',true)
+    sb.from('solicitacoes_orcamento').select('*').eq('id',id).single(),
+    sb.from('solicitacao_itens').select('*').eq('solicitacao_id',id).order('ordem'),
+    sb.from('cotacoes').select('*, fornecedores(nome)').eq('solicitacao_id',id).order('created_at'),
+    sb.from('fornecedores').select('*').eq('tenant_id',cfg.tenantId).eq('ativo',true)
   ]);
 
   let cotItensByCotacao = {};
   if(cotacoes && cotacoes.length){
-    const { data: allCi } = await supabase.from('cotacao_itens').select('*').in('cotacao_id', cotacoes.map(c=>c.id));
+    const { data: allCi } = await sb.from('cotacao_itens').select('*').in('cotacao_id', cotacoes.map(c=>c.id));
     (allCi||[]).forEach(ci=>{
       cotItensByCotacao[ci.cotacao_id] = cotItensByCotacao[ci.cotacao_id]||{};
       cotItensByCotacao[ci.cotacao_id][ci.solicitacao_item_id] = ci;
@@ -513,12 +513,12 @@ async function salvarCotacao(solicitacaoId){
     if(fileInput.files && fileInput.files[0]){
       const file = fileInput.files[0];
       const path = `${cfg.tenantId}/${numero}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from('cotacoes-anexos').upload(path, file, { upsert:true });
+      const { error: upErr } = await sb.storage.from('cotacoes-anexos').upload(path, file, { upsert:true });
       if(upErr) toast('Aviso: falha ao subir anexo ('+upErr.message+'), cotação será salva sem anexo.', true);
       else anexo_path = path;
     }
 
-    const { data: cot, error } = await supabase.from('cotacoes').insert({
+    const { data: cot, error } = await sb.from('cotacoes').insert({
       tenant_id: cfg.tenantId, numero, solicitacao_id: solicitacaoId, fornecedor_id,
       data_recebimento, origem_email, anexo_path, frete, forma_pagamento, prazo_entrega,
       validade, valor_total
@@ -526,10 +526,10 @@ async function salvarCotacao(solicitacaoId){
     if(error) throw error;
 
     const ciPayload = itemRows.map(r=>({...r, cotacao_id: cot.id}));
-    const { error: e2 } = await supabase.from('cotacao_itens').insert(ciPayload);
+    const { error: e2 } = await sb.from('cotacao_itens').insert(ciPayload);
     if(e2) throw e2;
 
-    await supabase.from('solicitacoes_orcamento').update({ status:'em_cotacao' }).eq('id', solicitacaoId);
+    await sb.from('solicitacoes_orcamento').update({ status:'em_cotacao' }).eq('id', solicitacaoId);
 
     closeModal();
     toast(`Cotação ${numero} registrada.`);
@@ -540,15 +540,15 @@ async function salvarCotacao(solicitacaoId){
 }
 
 async function abrirAnexo(path){
-  const { data, error } = await supabase.storage.from('cotacoes-anexos').createSignedUrl(path, 300);
+  const { data, error } = await sb.storage.from('cotacoes-anexos').createSignedUrl(path, 300);
   if(error){ toast('Erro ao abrir anexo: '+error.message, true); return; }
   window.open(data.signedUrl, '_blank');
 }
 
 async function marcarVencedora(solicitacaoId, cotacaoId){
   try{
-    await supabase.from('cotacoes').update({ vencedora:false }).eq('solicitacao_id', solicitacaoId);
-    const { error } = await supabase.from('cotacoes').update({ vencedora:true }).eq('id', cotacaoId);
+    await sb.from('cotacoes').update({ vencedora:false }).eq('solicitacao_id', solicitacaoId);
+    const { error } = await sb.from('cotacoes').update({ vencedora:true }).eq('id', cotacaoId);
     if(error) throw error;
     toast('Cotação vencedora selecionada.');
     renderSolicitacaoDetail(solicitacaoId);
@@ -581,15 +581,15 @@ async function salvarOC(solicitacaoId, cotacaoId){
   const observacoes = document.getElementById('oc_obs').value.trim();
 
   try{
-    const { data: cot } = await supabase.from('cotacoes').select('*').eq('id',cotacaoId).single();
+    const { data: cot } = await sb.from('cotacoes').select('*').eq('id',cotacaoId).single();
     const numero = await gerarId('OC');
-    const { error } = await supabase.from('ordens_compra').insert({
+    const { error } = await sb.from('ordens_compra').insert({
       tenant_id: cfg.tenantId, numero, solicitacao_id: solicitacaoId, cotacao_id: cotacaoId,
       fornecedor_id: cot.fornecedor_id, valor_total: cot.valor_total,
       autorizado_por, forma_autorizacao, observacoes, status:'emitida'
     });
     if(error) throw error;
-    await supabase.from('solicitacoes_orcamento').update({ status:'concluida' }).eq('id', solicitacaoId);
+    await sb.from('solicitacoes_orcamento').update({ status:'concluida' }).eq('id', solicitacaoId);
     closeModal();
     toast(`Ordem de Compra ${numero} gerada.`);
     renderSolicitacaoDetail(solicitacaoId);
@@ -602,7 +602,7 @@ async function salvarOC(solicitacaoId, cotacaoId){
 async function renderOrdensList(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><p class="muted">Carregando…</p></div>`;
-  const { data: ocs, error } = await supabase
+  const { data: ocs, error } = await sb
     .from('ordens_compra')
     .select('*, fornecedores(nome), solicitacoes_orcamento(numero)')
     .eq('tenant_id', cfg.tenantId)
@@ -637,7 +637,7 @@ async function renderOrdensList(){
   `;
 }
 async function updateOCStatus(id, status){
-  const { error } = await supabase.from('ordens_compra').update({ status }).eq('id', id);
+  const { error } = await sb.from('ordens_compra').update({ status }).eq('id', id);
   if(error) toast('Erro: '+error.message, true); else toast('Status atualizado.');
 }
 
@@ -647,7 +647,7 @@ async function updateOCStatus(id, status){
 async function renderFornecedores(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><p class="muted">Carregando…</p></div>`;
-  const { data: fs, error } = await supabase.from('fornecedores').select('*').eq('tenant_id', cfg.tenantId).order('nome');
+  const { data: fs, error } = await sb.from('fornecedores').select('*').eq('tenant_id', cfg.tenantId).order('nome');
   if(error){ main.innerHTML = `<div class="card empty">Erro: ${error.message}</div>`; return; }
 
   main.innerHTML = `
@@ -702,7 +702,7 @@ async function salvarFornecedor(){
     telefone: document.getElementById('nf_tel').value.trim(),
     qualificado_rq0714: document.getElementById('nf_qual').checked
   };
-  const { error } = await supabase.from('fornecedores').insert(payload);
+  const { error } = await sb.from('fornecedores').insert(payload);
   if(error){ toast('Erro: '+error.message, true); return; }
   closeModal(); toast('Fornecedor cadastrado.'); renderFornecedores();
 }
